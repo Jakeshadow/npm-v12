@@ -464,6 +464,26 @@ mv npm-shrinkwrap.json package-lock.json
   <summary>Why does npm view --json return an array instead of an object in v12?</summary>
   <div class="faq-answer"><p>npm v12 changed <code>npm view --json</code> output to always return an array, even for single-version queries. Scripts that parsed the old single-object format will break — e.g., <code>jq -r '.version'</code> needs to become <code>jq -r '.[0].version'</code>. Search your CI scripts and Makefiles for <code>npm view</code> combined with <code>--json</code> and update the JSON parsing accordingly.</p></div>
 </details>
+
+<details>
+  <summary>npm ci exits with code 0 but native modules weren't built — why is my deploy broken?</summary>
+  <div class="faq-answer"><p>This is the most dangerous scenario in npm v12. <code>npm ci</code> doesn't fail when scripts are blocked — it just skips them and exits cleanly. Your CI passes, but <code>node_modules</code> is missing compiled <code>.node</code> binaries (bcrypt, sharp, etc.). The app crashes at runtime with "cannot find module X.node", not at build time. Fix: Always run <code>npm approve-scripts --allow-scripts-pending</code> in CI first, approve the required packages, and commit the allowlist. Add a smoke test after <code>npm ci</code> that actually requires the native module — don't rely on exit codes alone.</p></div>
+</details>
+
+<details>
+  <summary>I approved scripts in my monorepo root but workspace packages still can't run install scripts</summary>
+  <div class="faq-answer"><p>npm v12's <code>allow-scripts</code> approval is per-package and stored in each package's <code>package.json</code>. The root <code>package.json</code> allowlist doesn't propagate to workspace packages — each workspace with native deps needs its own <code>npm approve-scripts</code> run from within that workspace directory. For monorepos, the safest approach: set <code>allow-scripts=all</code> in the root <code>.npmrc</code> temporarily while you audit, then run <code>npm approve-scripts --allow-scripts-pending</code> in each workspace directory before committing individual allowlists.</p></div>
+</details>
+
+<details>
+  <summary>I set allow-scripts=true in .npmrc but scripts are still blocked — what's the real precedence?</summary>
+  <div class="faq-answer"><p>There's a critical distinction: <code>allow-scripts=true</code> in <code>.npmrc</code> <em>enables</em> script execution globally, but each package still needs to be in the <em>allowlist</em> stored in <code>package.json</code>. Think of it as a two-gate system: gate 1 is the global on/off switch (<code>.npmrc</code> / <code>--allow-scripts</code> flag / env var), gate 2 is the per-package allowlist. Both must pass. If you want the old "everything runs" behavior, set <code>allow-scripts=all</code> (not <code>true</code>) in <code>.npmrc</code>. The precedence order for the global switch is: CLI flag > environment variable > .npmrc > default (off).</p></div>
+</details>
+
+<details>
+  <summary>npm rebuild doesn't compile native modules in v12 — I thought rebuild bypassed the block?</summary>
+  <div class="faq-answer"><p><code>npm rebuild</code> is also subject to script blocking in v12. If a package isn't in the allowlist, <code>npm rebuild &lt;package&gt;</code> will skip it silently. This breaks the classic troubleshooting workflow of "just run npm rebuild." Fix: approve the package first with <code>npm approve-scripts &lt;package&gt;</code>, then <code>npm rebuild &lt;package&gt;</code> will actually compile. Alternatively, <code>npm rebuild --allow-scripts</code> bypasses the block for the rebuild command only.</p></div>
+</details>
 </section>
 
 </main>
@@ -519,7 +539,11 @@ mv npm-shrinkwrap.json package-lock.json
     {"@type": "Question", "name": "Why is --allow-scripts not working in npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "Two things to check: (1) You need npm >= 11.11.0 for the --allow-scripts flag. (2) In v12, --allow-scripts only enables top-level scripts, not transitive dependency scripts — use npm approve-scripts --allow-scripts-pending to see the full list."}},
     {"@type": "Question", "name": "Why is npm-shrinkwrap.json ignored / not loaded in npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm-shrinkwrap.json is fully removed in v12 — the file is no longer read, even if it exists. Rename it to package-lock.json. If you were shipping shrinkwrap inside a published package, switch to bundleDependencies in package.json instead."}},
     {"@type": "Question", "name": "Why do Git dependencies fail with git+https:// not resolving in npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 blocks all Git-based dependencies by default. Fix: add --allow-git to npm install, set allow-git=true in .npmrc, or (preferred) migrate Git deps to registry-published versions. Check your tree with grep -r git+ package.json."}},
-    {"@type": "Question", "name": "Why does npm view --json return an array instead of an object in v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 changed npm view --json to always return an array, even for single-version queries. Scripts parsing the old single-object format will break — jq -r .version needs to become jq -r .[0].version. Search CI scripts for npm view combined with --json and update JSON parsing accordingly."}}
+    {"@type": "Question", "name": "Why does npm view --json return an array instead of an object in v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 changed npm view --json to always return an array, even for single-version queries. Scripts parsing the old single-object format will break — jq -r .version needs to become jq -r .[0].version. Search CI scripts for npm view combined with --json and update JSON parsing accordingly."}},
+    {"@type": "Question", "name": "npm ci exits with code 0 but native modules were not built — why is my deploy broken?", "acceptedAnswer": {"@type": "Answer", "text": "npm ci does not fail when scripts are blocked — it skips them and exits cleanly. Your CI passes but node_modules is missing compiled .node binaries. Always run npm approve-scripts in CI first and commit the allowlist. Add a smoke test after npm ci that requires the native module — do not rely on exit codes alone."}},
+    {"@type": "Question", "name": "I approved scripts in my monorepo root but workspace packages still cannot run install scripts", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 allow-scripts approval is per-package. The root allowlist does not propagate to workspaces — each workspace with native deps needs its own npm approve-scripts run from within that workspace directory. Run npm approve-scripts --allow-scripts-pending in each workspace before committing individual allowlists."}},
+    {"@type": "Question", "name": "I set allow-scripts=true in .npmrc but scripts are still blocked — what is the real precedence?", "acceptedAnswer": {"@type": "Answer", "text": "There is a two-gate system: gate 1 is the global on/off switch (.npmrc / --allow-scripts flag / env var), gate 2 is the per-package allowlist in package.json. Both must pass. For old behavior use allow-scripts=all. Precedence: CLI flag > env var > .npmrc > default (off)."}},
+    {"@type": "Question", "name": "npm rebuild does not compile native modules in v12 — I thought rebuild bypassed the block?", "acceptedAnswer": {"@type": "Answer", "text": "npm rebuild is also subject to script blocking in v12. If a package is not in the allowlist, npm rebuild will skip it silently. Approve the package first with npm approve-scripts, then npm rebuild will compile. Or use npm rebuild --allow-scripts to bypass the block."}}
   ]
 }
 </script>
