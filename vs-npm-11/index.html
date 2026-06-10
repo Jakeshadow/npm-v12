@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>npm 11 vs 12: Breaking Changes Compared — What's Different in 2026</title>
+<meta name="description" content="npm 12 turns off dependency scripts, blocks Git deps, drops shrinkwrap. npm 11 keeps old defaults. Side-by-side comparison with migration decision guide.">
+<meta property="og:title" content="npm 11 vs 12: Breaking Changes Compared — What's Different in 2026">
+<meta property="og:description" content="npm 12 turns off dependency scripts, blocks Git deps, drops shrinkwrap. npm 11 keeps old defaults. Side-by-side comparison with migration decision guide.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://npmv12guide.com/vs-npm-11/">
+<meta property="og:site_name" content="npm v12 Guide">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="npm 11 vs 12: Breaking Changes Compared">
+<meta name="twitter:description" content="npm 12 turns off dependency scripts, blocks Git deps, drops shrinkwrap. Side-by-side comparison.">
+<link rel="canonical" href="https://npmv12guide.com/vs-npm-11/">
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
+  --danger: #f85149; --warn: #d2991d; --ok: #3fb950;
+  --code-bg: #1c2128; --radius: 6px; --max-w: 820px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.65;
+  padding: 0 1rem 3rem;
+}
+nav {
+  max-width: var(--max-w); margin: 0 auto; padding: 1.2rem 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .5rem;
+}
+nav a { color: var(--muted); text-decoration: none; font-size: .9rem; }
+nav a:hover { color: var(--accent); }
+.logo { font-weight: 600; color: var(--text); font-size: 1rem; }
+.logo span { color: var(--accent); }
+main { max-width: var(--max-w); margin: 0 auto; }
+.hero { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+h1 { font-size: 2rem; line-height: 1.3; margin-bottom: .6rem; }
+h2 { font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); }
+h3 { font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
+p { margin-bottom: 1rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.compare-table {
+  width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: .9rem;
+}
+.compare-table th {
+  background: var(--surface); text-align: left; padding: .65rem .8rem;
+  border: 1px solid var(--border); font-weight: 600;
+}
+.compare-table th:first-child { width: 35%; }
+.compare-table td {
+  padding: .55rem .8rem; border: 1px solid var(--border); vertical-align: top;
+  background: var(--surface);
+}
+.compare-table td:first-child { background: var(--bg); font-weight: 500; }
+.compare-table .v11 { color: var(--muted); }
+.compare-table .v12 { color: var(--text); }
+.compare-table code { font-size: .8rem; }
+.tag-yes { color: var(--ok); }
+.tag-no { color: var(--danger); }
+.tag-warn { color: var(--warn); }
+.tag-new { display: inline-block; background: rgba(63,185,80,.12); color: var(--ok); padding: .1rem .4rem; border-radius: 3px; font-size: .75rem; font-weight: 600; margin-left: .3rem; }
+.verdict {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.2rem 1.4rem; margin: 1rem 0;
+}
+.verdict h3 { margin-top: 0; display: flex; align-items: center; gap: .5rem; }
+.decision {
+  background: var(--surface); border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1rem 1.3rem; margin: .8rem 0;
+}
+.decision h3 { margin-top: 0; }
+.decision code { font-size: .82rem; }
+.back-link {
+  display: inline-block; margin: 2rem 0 1rem;
+  padding: .5rem 1rem; border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--muted); font-size: .9rem;
+}
+.back-link:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+footer {
+  max-width: var(--max-w); margin: 3rem auto 0; padding-top: 1.5rem;
+  border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem;
+}
+@media (max-width: 600px) {
+  h1 { font-size: 1.5rem; }
+  .compare-table { font-size: .78rem; }
+  .compare-table td, .compare-table th { padding: .4rem .5rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">npm<span>v12</span>guide</a>
+  <div>
+    <a href="/">Home</a> &nbsp;
+    <a href="/vs-npm-11/">npm 11 vs 12</a>
+  </div>
+</nav>
+
+<main>
+
+<section class="hero">
+  <h1>npm 11 vs 12: What's Different in 2026</h1>
+  <p style="font-size:1.1rem;color:var(--muted);max-width:640px;">
+    <strong style="color:var(--text);">npm 12 is a security overhaul, not a feature release.</strong>
+    The core difference: npm 11 trusts packages by default; npm 12 doesn't.
+    If your project has native modules, Git dependencies, or an old shrinkwrap file, upgrading will break your build — but the fixes are straightforward.
+  </p>
+</section>
+
+<section>
+<h2>Side-by-Side Comparison</h2>
+
+<table class="compare-table">
+<thead>
+<tr><th>Feature</th><th>npm 11</th><th>npm 12</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td>Dependency scripts</td>
+  <td class="v11"><span class="tag-yes">Run by default</span> — any package can execute <code>postinstall</code></td>
+  <td class="v12"><span class="tag-no">Blocked by default</span> — must approve per-package via <code>npm approve-scripts</code> <span class="tag-new">NEW</span></td>
+</tr>
+<tr>
+  <td>Git dependencies</td>
+  <td class="v11"><span class="tag-yes">Allowed</span> — <code>git+https://</code> resolves automatically</td>
+  <td class="v12"><span class="tag-no">Blocked</span> — requires <code>--allow-git</code> flag or <code>.npmrc</code> config</td>
+</tr>
+<tr>
+  <td>Remote URL deps</td>
+  <td class="v11"><span class="tag-yes">Allowed</span> — <code>https://...tgz</code> resolves automatically</td>
+  <td class="v12"><span class="tag-no">Blocked</span> — requires <code>--allow-remote</code> flag or <code>.npmrc</code> config</td>
+</tr>
+<tr>
+  <td>shrinkwrap</td>
+  <td class="v11"><span class="tag-yes">Supported</span> — <code>npm-shrinkwrap.json</code> loaded and honored</td>
+  <td class="v12"><span class="tag-no">Removed</span> — only <code>package-lock.json</code> works; shrinkwrap command gone</td>
+</tr>
+<tr>
+  <td><code>npm view --json</code></td>
+  <td class="v11">Returns <strong>single object</strong> for single version</td>
+  <td class="v12">Always returns <strong>array</strong> — scripts parsing single-object JSON will break</td>
+</tr>
+<tr>
+  <td>C++ compiler</td>
+  <td class="v11"><span class="tag-warn">C++11 minimum</span></td>
+  <td class="v12"><span class="tag-warn">C++17 required</span> (affects native addon builds)</td>
+</tr>
+<tr>
+  <td><code>npm star</code> / <code>stars</code> / <code>unstar</code></td>
+  <td class="v11"><span class="tag-yes">Available</span></td>
+  <td class="v12"><span class="tag-no">Removed</span> — package favoriting feature deprecated</td>
+</tr>
+<tr>
+  <td><code>npm adduser</code></td>
+  <td class="v11"><span class="tag-yes">Available</span></td>
+  <td class="v12"><span class="tag-no">Removed</span> — use <code>npm login</code>; create accounts on npmjs.com</td>
+</tr>
+<tr>
+  <td>Man pages</td>
+  <td class="v11"><span class="tag-yes">Global registration</span></td>
+  <td class="v12"><span class="tag-warn">Not global</span> — use <code>npm help</code> instead</td>
+</tr>
+<tr>
+  <td>SBOM CycloneDX</td>
+  <td class="v11">Reports <strong>directory name</strong></td>
+  <td class="v12">Reports <strong><code>package.json</code> name</strong></td>
+</tr>
+<tr>
+  <td>Script allowlisting</td>
+  <td class="v11"><span class="tag-no">No built-in mechanism</span></td>
+  <td class="v12"><span class="tag-yes"><code>npm approve-scripts</code></span> — per-package allowlist in <code>package.json</code> <span class="tag-new">NEW</span></td>
+</tr>
+<tr>
+  <td>Darknet/Caffe support</td>
+  <td class="v11"><span class="tag-yes">Available</span></td>
+  <td class="v12"><span class="tag-no">Gone</span> — must convert models to ONNX first</td>
+</tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2>Security: The Real Difference</h2>
+
+<div class="verdict">
+  <h3>npm 11 — Trust by Default <span style="font-weight:400;color:var(--muted);font-size:.9rem;">(insecure)</span></h3>
+  <p style="color:var(--muted);">For 12 years, a single compromised package with a <code>postinstall</code> script could exfiltrate environment variables, SSH keys, and <code>.npmrc</code> tokens from any machine running <code>npm install</code>. The Shai Halud supply-chain attack exploited exactly this vector. npm 11 still operates under this model — scripts execute unless you explicitly use <code>--ignore-scripts</code>.</p>
+</div>
+
+<div class="verdict">
+  <h3>npm 12 — Trust Nobody <span style="font-weight:400;color:var(--ok);font-size:.9rem;">(secure by default)</span></h3>
+  <p style="color:var(--muted);">npm 12 flips the model: <strong>zero scripts execute unless you explicitly approve each package.</strong> The <code>npm approve-scripts</code> workflow lets you audit what runs, approve trusted packages (sharp, esbuild, node-gyp), and deny the rest. The allowlist lives in <code>package.json</code> — commit it, audit it, own it.</p>
+</div>
+
+<div class="verdict">
+  <h3>Git and Remote Deps — Two Attack Vectors Closed</h3>
+  <p style="color:var(--muted);">A Git dependency's <code>.npmrc</code> could override the Git executable path even with <code>--ignore-scripts</code>. Remote tarball URLs are unverifiable. npm 12 blocks both by default — these are not theoretical attack paths, they're explicitly cited in npm's security announcements.</p>
+</div>
+</section>
+
+<section>
+<h2>Migration Difficulty: Head-to-Head</h2>
+
+<table class="compare-table">
+<thead>
+<tr><th>Scenario</th><th>npm 11 → 12 Effort</th><th>Key Action</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td>Pure JS project (no native deps)</td>
+  <td><span class="tag-yes">Minimal</span> — 5 minutes</td>
+  <td><code>npm install -g npm@12</code></td>
+</tr>
+<tr>
+  <td>Project with native deps</td>
+  <td><span class="tag-warn">Medium</span> — 30 minutes</td>
+  <td>Run <code>npm approve-scripts --allow-scripts-pending</code>, approve trusted packages</td>
+</tr>
+<tr>
+  <td>Monorepo with Git deps</td>
+  <td><span class="tag-warn">Medium</span> — 1 hour</td>
+  <td>Add <code>allow-git=true</code> to <code>.npmrc</code>; audit all <code>package.json</code> files</td>
+</tr>
+<tr>
+  <td>Legacy project with shrinkwrap</td>
+  <td><span class="tag-warn">Medium</span> — 1 hour</td>
+  <td>Rename to <code>package-lock.json</code> or switch to <code>bundleDependencies</code></td>
+</tr>
+<tr>
+  <td>CI/CD with custom <code>npm view</code> scripts</td>
+  <td><span class="tag-warn">Medium</span> — 1 hour</td>
+  <td>Update JSON parsing: single object → array</td>
+</tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2>Decision Guide</h2>
+
+<div class="decision">
+  <h3>Stay on npm 11 if...</h3>
+  <ul>
+    <li>You're in the middle of a critical release cycle — don't change package managers mid-sprint</li>
+    <li>You have unmaintained native dependencies with no alternatives — the <code>allowScripts</code> audit will surface them</li>
+    <li>Your CI infrastructure can't be updated to Node.js versions that will bundle npm 12 (but this is temporary)</li>
+  </ul>
+</div>
+
+<div class="decision">
+  <h3>Upgrade to npm 12 now if...</h3>
+  <ul>
+    <li>You maintain CI/CD pipelines — prepare <em>before</em> Node.js bundles v12 and breaks your builds</li>
+    <li>You ship software to security-conscious customers — "we use npm 12 default security" is a selling point</li>
+    <li>You want to audit your dependency scripts <em>before</em> an attacker does — <code>npm approve-scripts --allow-scripts-pending</code> works on npm 11.16.0+ too</li>
+  </ul>
+</div>
+
+<div class="decision">
+  <h3>Upgrade later (but prepare now) if...</h3>
+  <ul>
+    <li>Your project has <strong>Git dependencies in transitive packages</strong> — audit them first on npm 11.16.0+</li>
+    <li>You publish packages with <code>npm-shrinkwrap.json</code> — the <code>bundleDependencies</code> migration needs testing</li>
+    <li>You need to update CI scripts that parse <code>npm view --json</code> output — grep and fix before the upgrade</li>
+  </ul>
+</div>
+</section>
+
+<section>
+<h2>Timeline: When npm 12 Hits You</h2>
+
+<table class="compare-table">
+<thead>
+<tr><th>Milestone</th><th>Timeline</th><th>What It Means</th></tr>
+</thead>
+<tbody>
+<tr><td>npm 12 pre-release</td><td>June 9, 2026</td><td>Changelog published; warnings in npm 11.16.0+</td></tr>
+<tr><td>npm 12 GA</td><td>Estimated July 2026</td><td><code>npm install -g npm@12</code> available</td></tr>
+<tr><td>Node.js 22.x bundles npm 12</td><td>~August-October 2026</td><td>First LTS line to ship v12 — CI starts breaking</td></tr>
+<tr><td>Node.js 24.x bundles npm 12</td><td>~October-December 2026</td><td>Second LTS — adoption accelerates</td></tr>
+<tr><td>npm 11 EOL</td><td>~2027</td><td>Security patches stop — must migrate</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2>FAQ</h2>
+
+<details>
+  <summary>Do I have to upgrade from npm 11 to 12?</summary>
+  <div class="faq-answer"><p>Not immediately, but eventually yes. Once Node.js LTS lines bundle npm 12 (estimated late 2026), you'll get v12 automatically when you upgrade Node.js. You can pin npm 11 with <code>npm install -g npm@11</code>, but that's a short-term workaround, not a strategy. The smart move: prepare on npm 11.16.0+ now, migrate on your schedule, not Node's.</p></div>
+</details>
+
+<details>
+  <summary>Which npm 12 breaking changes will actually affect me?</summary>
+  <div class="faq-answer"><p><strong>P0 (will break you):</strong> allowScripts off — if you have ANY native dependencies (bcrypt, sharp, esbuild, node-sass), your build fails. <strong>P1 (may break you):</strong> Git deps blocked if you use <code>git+https://</code> deps; shrinkwrap removal if you publish CLI tools; <code>npm view</code> JSON format change if your CI parses it. <strong>P2 (unlikely):</strong> remote URL deps, C API removal, Darknet/Caffe parsers gone. <a href="/#breaking-changes">Full breakdown →</a></p></div>
+</details>
+
+<details>
+  <summary>Is npm 12 faster than npm 11?</summary>
+  <div class="faq-answer"><p>npm 12 is primarily a <strong>security release</strong>, not a performance release. Install speed should be similar to npm 11. The main change is that <em>fewer things happen during install</em> (scripts don't run, Git deps don't resolve, remote URLs don't download), which can actually make installs <em>faster</em> in some cases — but that's a side effect, not the goal.</p></div>
+</details>
+
+<details>
+  <summary>What about pnpm and Yarn? How do they compare?</summary>
+  <div class="faq-answer"><p>Both pnpm and Yarn 4+ already have per-package script allowlisting — pnpm via <code>pnpm.onlyBuiltDependencies</code>, Yarn via similar supply-chain protections. npm 12 is catching up to the security posture pnpm and Yarn have had for years. If you're already on pnpm/Yarn, the npm 12 changes won't affect you directly, but transitive dependencies installed via npm will still need the new approvals.</p></div>
+</details>
+
+<details>
+  <summary>Can I test npm 12 behavior without installing it?</summary>
+  <div class="faq-answer"><p>Yes. Install npm 11.16.0+: <code>npm install -g npm@11</code>. Run <code>npm install</code> in your project — it will show <strong>warnings</strong> previewing v12 behavior (which scripts would be blocked, which Git/remote deps would fail). No changes are enforced, but you can see exactly what will break and fix it before v12 lands.</p></div>
+</details>
+</section>
+
+<a href="/" class="back-link">← Back to npm v12 Migration Guide</a>
+
+</main>
+
+<footer>
+  <p><a href="/">npmv12guide.com</a> — Full migration guide with 6 breaking changes ranked P0→P2, copy-paste fixes, and migration checklist.</p>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "npm 11 vs 12: Breaking Changes Compared — What's Different in 2026",
+  "description": "npm 12 turns off dependency scripts, blocks Git deps, drops shrinkwrap. npm 11 keeps old defaults. Side-by-side comparison with migration decision guide.",
+  "datePublished": "2026-06-10",
+  "dateModified": "2026-06-10",
+  "author": {"@type": "Organization", "name": "npmv12guide"}
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://npmv12guide.com/"},
+    {"@type": "ListItem", "position": 2, "name": "npm 11 vs 12 Comparison", "item": "https://npmv12guide.com/vs-npm-11/"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Do I have to upgrade from npm 11 to 12?", "acceptedAnswer": {"@type": "Answer", "text": "Not immediately, but eventually yes. Once Node.js LTS lines bundle npm 12 (estimated late 2026), you'll get v12 automatically when you upgrade Node.js. You can pin npm 11 as a short-term workaround. Prepare on npm 11.16.0+ now, migrate on your schedule."}},
+    {"@type": "Question", "name": "Which npm 12 breaking changes will actually affect me?", "acceptedAnswer": {"@type": "Answer", "text": "P0: allowScripts off — if you have any native dependencies (bcrypt, sharp, esbuild), your build fails. P1: Git deps blocked, shrinkwrap removal, npm view JSON format change. P2: remote URL deps, C API removal, Darknet/Caffe parsers."}},
+    {"@type": "Question", "name": "Is npm 12 faster than npm 11?", "acceptedAnswer": {"@type": "Answer", "text": "npm 12 is primarily a security release, not a performance release. Install speed should be similar to npm 11. Fewer things happen during install (scripts don't run, Git deps don't resolve), which can make installs faster as a side effect."}},
+    {"@type": "Question", "name": "What about pnpm and Yarn? How do they compare?", "acceptedAnswer": {"@type": "Answer", "text": "Both pnpm and Yarn 4+ already have per-package script allowlisting. npm 12 is catching up to the security posture pnpm and Yarn have had for years."}},
+    {"@type": "Question", "name": "Can I test npm 12 behavior without installing it?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Install npm 11.16.0+ and run npm install — it will show warnings previewing v12 behavior (which scripts would be blocked, which Git/remote deps would fail). No changes are enforced, but you can see exactly what will break."}}
+  ]
+}
+</script>
+
+</body>
+</html>
