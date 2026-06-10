@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://npmv12guide.pages.dev/sitemap.xml
+Sitemap: https://npmv12guide.com/sitemap.xml
