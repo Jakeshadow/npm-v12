@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>npm v12 Breaking Changes: Migration Guide for Your Project</title>
+<meta name="description" content="npm v12 disables dependency scripts, drops shrinkwrap, and blocks Git deps by default. What breaks, how to fix, and what to skip — with migration checklist.">
+<link rel="canonical" href="https://npmv12guide.pages.dev/">
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --muted: #8b949e;
+  --accent: #58a6ff;
+  --danger: #f85149;
+  --warn: #d2991d;
+  --ok: #3fb950;
+  --code-bg: #1c2128;
+  --radius: 6px;
+  --max-w: 820px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+  padding: 0 1rem 3rem;
+}
+nav {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 1.2rem 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+nav a { color: var(--muted); text-decoration: none; font-size: .9rem; }
+nav a:hover { color: var(--accent); }
+.logo { font-weight: 600; color: var(--text); font-size: 1rem; }
+.logo span { color: var(--accent); }
+main { max-width: var(--max-w); margin: 0 auto; }
+
+.hero {
+  padding: 3rem 0 2rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+.priority-tag { display: inline-block; padding: .15rem .5rem; border-radius: 3px; font-size: .8rem; font-weight: 600; margin-right: .3rem; }
+.tag-p0 { background: rgba(248,81,73,.15); color: var(--danger); }
+.tag-p1 { background: rgba(210,153,29,.15); color: var(--warn); }
+.tag-p2 { background: rgba(139,148,158,.15); color: var(--muted); }
+.tag-skip { background: rgba(63,185,80,.12); color: var(--ok); }
+.eta { color: var(--warn); font-weight: 600; }
+h1 { font-size: 2rem; line-height: 1.3; margin-bottom: .6rem; }
+h2 { font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); }
+h3 { font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
+p { margin-bottom: 1rem; color: var(--text); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  font-size: .88rem;
+  line-height: 1.55;
+  margin: .8rem 0 1.2rem;
+  position: relative;
+}
+code { font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: .88rem; }
+:not(pre) > code {
+  background: var(--code-bg);
+  padding: .12rem .35rem;
+  border-radius: 3px;
+  font-size: .85rem;
+  border: 1px solid var(--border);
+}
+.copy-btn {
+  position: absolute; top: .5rem; right: .5rem;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--muted); padding: .25rem .6rem; border-radius: 3px;
+  font-size: .75rem; cursor: pointer;
+}
+.copy-btn:hover { color: var(--text); border-color: var(--muted); }
+.copy-btn.copied { color: var(--ok); border-color: var(--ok); }
+
+ul, ol { margin: .5rem 0 1rem 1.5rem; }
+li { margin-bottom: .35rem; }
+
+.breaking-change {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.2rem 1.4rem;
+  margin: 1rem 0;
+}
+.breaking-change h3 { margin-top: 0; display: flex; align-items: center; gap: .5rem; }
+
+.checklist { list-style: none; margin-left: 0; }
+.checklist li {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .7rem 1rem;
+  margin-bottom: .5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: .6rem;
+}
+.checklist li::before { content: "☐"; color: var(--muted); font-size: 1.1rem; flex-shrink: 0; }
+.checklist code { font-size: .82rem; }
+
+.use-case {
+  background: var(--surface);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1rem 1.3rem;
+  margin: .8rem 0;
+}
+.use-case h3 { margin-top: 0; }
+
+details {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: .5rem;
+}
+details summary {
+  padding: .8rem 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  list-style: none;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: "▸"; margin-right: .5rem; color: var(--accent); font-size: .8rem; }
+details[open] summary::before { content: "▾"; }
+details .faq-answer { padding: 0 1rem 1rem 2rem; color: var(--muted); }
+details .faq-answer p { color: var(--muted); }
+details .faq-answer code { font-size: .82rem; }
+
+.other-changes { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.3rem; }
+.other-changes ul { margin-bottom: 0; }
+
+.rollback {
+  background: rgba(248,81,73,.08);
+  border: 1px solid rgba(248,81,73,.2);
+  border-radius: var(--radius);
+  padding: 1rem 1.3rem;
+  margin: 1.5rem 0 0;
+}
+.rollback strong { color: var(--danger); }
+
+footer {
+  max-width: var(--max-w);
+  margin: 3rem auto 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: .85rem;
+}
+
+@media (max-width: 600px) {
+  h1 { font-size: 1.5rem; }
+  pre { font-size: .8rem; padding: .8rem; }
+  .breaking-change { padding: .9rem 1rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">npm<span>v12</span>guide</a>
+  <div>
+    <a href="#what">What's New</a> &nbsp;
+    <a href="#breaking-changes">Breaking Changes</a> &nbsp;
+    <a href="#checklist">Checklist</a> &nbsp;
+    <a href="#faq">FAQ</a>
+  </div>
+</nav>
+
+<main>
+
+<section class="hero">
+  <h1>npm v12 Breaking Changes — Migration Guide</h1>
+  <p style="font-size:1.1rem;color:var(--muted);max-width:640px;">
+    npm v12 is a <strong style="color:var(--text);">security-first</strong> major release shipping <span class="eta">July 2026</span>.
+    Dependency scripts, Git deps, and remote tarballs are all <strong style="color:var(--text);">off by default</strong>.
+    Here's exactly what breaks, how to fix it, and which changes you can safely ignore.
+  </p>
+  <p style="color:var(--warn);font-size:.9rem;">
+    Prepare now — npm 11.16.0+ already surfaces v12 warnings.
+  </p>
+</section>
+
+<section id="what">
+<h2>What Is npm v12</h2>
+<p>
+  npm v12 is a <strong>security-first</strong> major release that changes how <code>npm install</code> works.
+  Instead of auto-running dependency scripts, auto-resolving Git dependencies, and auto-downloading remote tarballs,
+  v12 makes you <strong>explicitly opt in</strong> to each of these behaviors.
+</p>
+<p>
+  For most developers this means: your <code>npm install</code> will stop running postinstall scripts by default.
+  Native modules (anything with <code>node-gyp</code>) won't compile.
+  Git dependencies in your <code>package.json</code> will fail to resolve.
+  Remote URL dependencies will block.
+  And <code>npm-shrinkwrap.json</code> is gone.
+</p>
+<p>
+  The release is estimated for <strong>July 2026</strong>.
+  You can prepare today using npm 11.16.0+, which already shows warnings for the upcoming v12 behavior.
+</p>
+</section>
+
+<section id="why">
+<h2>Why npm v12 Matters</h2>
+
+<h3>1. Postinstall scripts are a supply-chain disaster — and v12 finally fixes them</h3>
+<p>
+  npm has let any package in your dependency tree run arbitrary code during install for over a decade.
+  A single compromised package with a <code>postinstall</code> script can exfiltrate env vars, SSH keys, and <code>.npmrc</code> tokens.
+  The Shai Halud supply-chain attack made it impossible to ignore.
+  v12 flips the default: <strong>scripts are off</strong>. You approve them explicitly.
+</p>
+
+<h3>2. You will get v12 whether you want it or not</h3>
+<p>
+  Node.js bundles npm. When LTS releases (22, 24, 26) pick up the v12 bundle, your CI pipelines and dev environments
+  will suddenly have different npm behavior. The question isn't "should I upgrade?" — it's
+  "<strong>when will it hit me</strong> and how do I prepare?"
+</p>
+
+<h3>3. Git and remote dependency blocking close two real code-execution vectors</h3>
+<p>
+  A Git dependency's <code>.npmrc</code> could override the Git executable path, even with <code>--ignore-scripts</code>.
+  Remote tarball URLs are unverifiable. v12 closes both by requiring <code>--allow-git</code> and <code>--allow-remote</code> flags.
+  These are not theoretical — they're explicitly cited attack paths in the npm security announcements.
+</p>
+</section>
+
+<section id="breaking-changes">
+<h2>Breaking Changes — What Breaks and How to Fix It</h2>
+
+<div class="breaking-change">
+  <h3><span class="priority-tag tag-p0">P0</span> allowScripts defaults to off</h3>
+  <p><strong>What changed:</strong> <code>npm install</code> no longer runs preinstall/install/postinstall scripts, including implicit node-gyp rebuilds for native packages (those with <code>binding.gyp</code> and no explicit install script).</p>
+  <p><strong>Who it affects:</strong> Any project with native dependencies — bcrypt, sharp, esbuild, Puppeteer, node-sass. This will break most projects.</p>
+  <p><strong>The fix:</strong></p>
+  <pre># Step 1: See what will be blocked
+npm approve-scripts --allow-scripts-pending
+
+# Step 2: Approve packages you trust
+npm approve-scripts bcrypt sharp node-gyp
+
+# Step 3: Block the rest
+npm deny-scripts
+
+# This writes an allowlist to package.json. Commit it.</pre>
+  <p>For global installs, use <code>.npmrc</code>: <code>allow-scripts=path/to/global-allowlist.json</code> or run with <code>--allow-scripts</code>.</p>
+</div>
+
+<div class="breaking-change">
+  <h3><span class="priority-tag tag-p1">P1</span> --allow-git defaults to none</h3>
+  <p><strong>What changed:</strong> Git dependencies (direct or transitive) no longer resolve without <code>--allow-git</code>.</p>
+  <p><strong>Who it affects:</strong> You if you have any <code>git+https://</code> or <code>github:user/repo</code> dependencies in <code>package.json</code>, or any transitive dependency that does. Monorepo setups often use Git deps for pre-release versions.</p>
+  <p><strong>The fix:</strong></p>
+  <pre># Option A: per-command flag
+npm install --allow-git
+
+# Option B: npmrc (project or global)
+echo "allow-git=true" >> .npmrc
+
+# Option C: migrate to npm registry versions wherever possible</pre>
+  <p>This change was pre-announced Feb 2026. Available as a warning in npm 11.10.0+.</p>
+</div>
+
+<div class="breaking-change">
+  <h3><span class="priority-tag tag-p2">P2</span> --allow-remote defaults to none</h3>
+  <p><strong>What changed:</strong> Dependencies from remote URLs (https tarballs, direct and transitive) no longer resolve without <code>--allow-remote</code>.</p>
+  <p><strong>Who it affects:</strong> You if your <code>package.json</code> or any dependency points to <code>https://example.com/package.tgz</code>. Also affects some private registry setups that serve tarballs via raw URLs.</p>
+  <p><strong>The fix:</strong></p>
+  <pre>npm install --allow-remote
+# Or in .npmrc:
+# allow-remote=true</pre>
+  <p>The initial implementation had a bug (GitHub Issue #9347) where <code>allow-remote=none</code> blocked even standard registry tarballs. <strong>This was fixed</strong> — <code>allow-remote</code> correctly only blocks non-registry URLs now.</p>
+</div>
+
+<div class="breaking-change">
+  <h3><span class="priority-tag tag-skip">NO-OP</span> --allow-file and --allow-directory are NOT changing</h3>
+  <p>Local file/directory deps (<code>"package": "file:../local-package"</code>) still work. Only git and remote are affected. This is the noise you can safely skip.</p>
+</div>
+
+<div class="breaking-change">
+  <h3><span class="priority-tag tag-p1">P1</span> npm-shrinkwrap.json is gone</h3>
+  <p><strong>What changed:</strong> <code>npm shrinkwrap</code> command removed, <code>npm-shrinkwrap.json</code> no longer loaded or honored at project root or inside dependency tarballs. The <code>shrinkwrap</code> config alias is also removed.</p>
+  <p><strong>Who it affects:</strong> Legacy projects that still use <code>npm-shrinkwrap.json</code> instead of <code>package-lock.json</code>. Common in deployed CLI tools and daemons that publish to the registry.</p>
+  <p><strong>The fix:</strong></p>
+  <pre># Rename at project root
+mv npm-shrinkwrap.json package-lock.json
+
+# If you were shipping a locked dependency tree inside a published package,
+# use bundleDependencies instead:
+# In package.json: "bundleDependencies": ["dep-name"]</pre>
+  <p>Note: If both files exist, npm previously preferred shrinkwrap. Now only <code>package-lock.json</code> works.</p>
+</div>
+
+<div class="breaking-change">
+  <h3><span class="priority-tag tag-p1">P1</span> npm view --json now always returns an array</h3>
+  <p><strong>What changed:</strong> Previously <code>npm view package --json</code> returned a single object for a single version. Now it always returns an array.</p>
+  <p><strong>Who it affects:</strong> Any CI scripts, build tools, or automation that parsed single-object JSON from <code>npm view</code>.</p>
+  <p><strong>The fix:</strong></p>
+  <pre># Before: npm view lodash version --json  → "4.17.21"
+# After:  npm view lodash version --json  → ["4.17.21"]
+
+# Fix your scripts to handle arrays:
+# jq example: was 'jq -r .version', now 'jq -r ".[0]"'</pre>
+</div>
+
+<div class="other-changes">
+  <h3 style="margin-top:0;">Other v12 changes <span class="priority-tag tag-p2">P2</span> — unlikely to affect you</h3>
+  <ul>
+    <li><code>npm star</code> / <code>stars</code> / <code>unstar</code> commands removed (package favoriting feature)</li>
+    <li><code>npm adduser</code> removed — use <code>npm login</code>; create accounts on npmjs.com</li>
+    <li><code>npm pkg</code> output no longer forced to JSON</li>
+    <li>Twitter and Freenode profile fields removed from registry</li>
+    <li>Man pages no longer registered globally; use <code>npm help</code> instead</li>
+    <li>SBOM CycloneDX format now reports <code>package.json</code> name, not directory name</li>
+    <li><code>npm u</code> is now an alias for <code>npm update</code></li>
+  </ul>
+</div>
+</section>
+
+<section id="checklist">
+<h2>Migration Checklist</h2>
+<ol class="checklist">
+  <li><strong>Upgrade to npm 11.16.0+ first</strong> — <code>npm install -g npm@11</code></li>
+  <li><strong>Run an install and review warnings</strong> — <code>npm install</code> now previews v12 behavior</li>
+  <li><strong>Audit dependency scripts</strong> — <code>npm approve-scripts --allow-scripts-pending</code> shows every package that runs scripts</li>
+  <li><strong>Approve trusted packages</strong> — <code>npm approve-scripts &lt;package-name&gt;</code> and commit the updated <code>package.json</code></li>
+  <li><strong>Check for npm-shrinkwrap.json</strong> — <code>ls npm-shrinkwrap.json</code> — if found, rename to <code>package-lock.json</code></li>
+  <li><strong>Find Git dependencies</strong> — <code>grep -r "git+" package.json</code> — decide to allow or migrate to registry versions</li>
+  <li><strong>Find remote URL deps</strong> — <code>grep -r "https://.*\.tgz" package.json</code> — migrate or add <code>--allow-remote</code></li>
+  <li><strong>Fix npm view JSON parsing</strong> — grep your CI scripts for <code>npm view</code> + <code>--json</code> — update to handle array output</li>
+  <li><strong>Update .npmrc if needed</strong> — add <code>allow-git=true</code> or <code>allow-remote=true</code> only if you actually need them</li>
+</ol>
+
+<div class="rollback">
+  <strong>Quick rollback:</strong>
+  <pre style="margin:.5rem 0 0;background:transparent;border-color:rgba(248,81,73,.2);">npm install -g npm@11    # stays on v11 behavior</pre>
+  <p style="margin:.5rem 0 0;font-size:.9rem;color:var(--muted);">This is temporary — once Node.js bundles v12, rollback gets harder. <strong>Prepare now.</strong></p>
+</div>
+</section>
+
+<section id="use-cases">
+<h2>Who Gets Hit Hardest</h2>
+
+<div class="use-case">
+  <h3>CI/CD Pipeline Maintainer</h3>
+  <p>Your CI runs <code>npm ci</code> in a clean environment. v12 means no scripts run by default — native modules won't compile, and your build will fail 30 seconds in with "cannot find module X.node". <strong>Fix:</strong> commit the approved-scripts allowlist, or add <code>--allow-scripts</code> to CI after auditing all deps.</p>
+</div>
+
+<div class="use-case">
+  <h3>Monorepo Maintainer</h3>
+  <p>Workspaces, cross-references, and Git dependencies for pre-release packages are common in monorepos. <code>--allow-git</code> will be needed across the entire tree if any package has a Git dep. Check your root and all sub-package <code>package.json</code> files.</p>
+</div>
+
+<div class="use-case">
+  <h3>Package Author with shrinkwrap</h3>
+  <p>If you publish a CLI or daemon and ship <code>npm-shrinkwrap.json</code> to lock deps, you need to switch to <code>bundleDependencies</code> or accept that <code>package-lock.json</code> won't ship with the published package (it's always ignored on publish). This is the hardest case — <code>bundleDependencies</code> has different semantics from shrinkwrap.</p>
+</div>
+
+<div class="use-case">
+  <h3>Everyday Developer — "npm install just stopped working"</h3>
+  <p>You clone a repo, run <code>npm install</code>, and get errors about native modules or missing dependencies. Top 3 fixes: (1) <code>npm install --allow-scripts</code>, (2) check that the project has <code>allow-scripts</code> configured in <code>package.json</code>, (3) if it's an old project, there may be a <code>npm-shrinkwrap.json</code> that needs renaming.</p>
+</div>
+</section>
+
+<section id="faq">
+<h2>FAQ</h2>
+
+<details>
+  <summary>When exactly does npm v12 release, and when will it hit my Node.js?</summary>
+  <div class="faq-answer"><p>npm v12 is estimated July 2026. No confirmed date for Node.js bundling. Current LTS lines (22, 24, 26) ship npm 11.x. Historically, new npm majors take 2–4 Node releases to land. But you should prepare now — v11.16.0 already shows warnings.</p></div>
+</details>
+
+<details>
+  <summary>Will <code>--allow-scripts</code> give me the old behavior back?</summary>
+  <div class="faq-answer"><p>Yes. Adding <code>allow-scripts=all</code> to <code>.npmrc</code> restores the pre-v12 behavior. But the point is to move to an explicit allowlist approach. <code>npm approve-scripts</code> per package is the intended workflow — it's more secure and transparent.</p></div>
+</details>
+
+<details>
+  <summary>I have 200 dependencies. Do I need to manually approve every script?</summary>
+  <div class="faq-answer"><p>No. Most packages don't have lifecycle scripts. Run <code>npm approve-scripts --allow-scripts-pending</code> to see the actual list — likely 3–8 packages. Approve the ones you trust (sharp, esbuild, node-gyp itself) and deny the rest.</p></div>
+</details>
+
+<details>
+  <summary>What about Yarn and pnpm? Do they have the same issues?</summary>
+  <div class="faq-answer"><p>pnpm already supports per-package script allowlisting (via <code>pnpm.onlyBuiltDependencies</code>). Yarn 4+ has similar supply-chain protections. Both have had these controls for longer than npm. If you're already on pnpm/Yarn, you may not feel this pain at all.</p></div>
+</details>
+
+<details>
+  <summary>The allow-remote flag was blocking registry tarballs — is that fixed?</summary>
+  <div class="faq-answer"><p>Yes. GitHub Issue #9347 tracked a bug where <code>allow-remote=none</code> blocked even standard npm registry downloads. Fixed in npm 11.15.0+. The flag correctly only blocks non-registry URLs now.</p></div>
+</details>
+
+<details>
+  <summary>What if I still need npm-shrinkwrap.json for my published CLI tool?</summary>
+  <div class="faq-answer"><p>Switch to <code>bundleDependencies</code>. Add <code>"bundleDependencies": ["dep-a", "dep-b"]</code> to <code>package.json</code>. When published, those deps are bundled in the tarball and installed from the local copy. Different semantics from shrinkwrap but solves the same problem.</p></div>
+</details>
+
+<details>
+  <summary>How do I check if my project has hidden Git or remote deps from transitive dependencies?</summary>
+  <div class="faq-answer"><p>Run <code>npm ls --all | grep -E "(git\+|https://.*\.tgz)"</code> while on npm 11.16.0+. Warnings will flag any transitive Git or remote deps. You can also audit your lockfile: <code>grep -r "git+" package-lock.json</code>.</p></div>
+</details>
+</section>
+
+</main>
+
+<footer>
+  <p>Built from 14 sources · 7 pain signals · 6 breaking changes mapped · npm v12 estimated July 2026</p>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "npm v12 Breaking Changes: Migration Guide for Your Project",
+  "description": "npm v12 disables dependency scripts, drops shrinkwrap, and blocks Git deps by default. What breaks, how to fix, and what to skip — with migration checklist.",
+  "datePublished": "2026-06-10",
+  "dateModified": "2026-06-10",
+  "author": {"@type": "Organization", "name": "npmv12guide"}
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://npmv12guide.pages.dev/"},
+    {"@type": "ListItem", "position": 2, "name": "npm v12 Migration Guide", "item": "https://npmv12guide.pages.dev/"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "When exactly does npm v12 release, and when will it hit my Node.js?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 is estimated July 2026. No confirmed date for Node.js bundling. Current LTS lines (22, 24, 26) ship npm 11.x. Historically, new npm majors take 2–4 Node releases to land. But you should prepare now — v11.16.0 already shows warnings."}},
+    {"@type": "Question", "name": "Will --allow-scripts give me the old behavior back?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Adding allow-scripts=all to .npmrc restores the pre-v12 behavior. But the point is to move to an explicit allowlist approach. npm approve-scripts per package is the intended workflow — it's more secure and transparent."}},
+    {"@type": "Question", "name": "I have 200 dependencies. Do I need to manually approve every script?", "acceptedAnswer": {"@type": "Answer", "text": "No. Most packages don't have lifecycle scripts. Run npm approve-scripts --allow-scripts-pending to see the actual list — likely 3–8 packages. Approve the ones you trust (sharp, esbuild, node-gyp itself) and deny the rest."}},
+    {"@type": "Question", "name": "What about Yarn and pnpm? Do they have the same issues?", "acceptedAnswer": {"@type": "Answer", "text": "pnpm already supports per-package script allowlisting (via pnpm.onlyBuiltDependencies). Yarn 4+ has similar supply-chain protections. Both have had these controls for longer than npm."}},
+    {"@type": "Question", "name": "The allow-remote flag was blocking registry tarballs — is that fixed?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. GitHub Issue #9347 tracked a bug where allow-remote=none blocked even standard npm registry downloads. Fixed in npm 11.15.0+. The flag correctly only blocks non-registry URLs now."}},
+    {"@type": "Question", "name": "What if I still need npm-shrinkwrap.json for my published CLI tool?", "acceptedAnswer": {"@type": "Answer", "text": "Switch to bundleDependencies. Add \"bundleDependencies\": [\"dep-a\", \"dep-b\"] to package.json. When published, those deps are bundled in the tarball and installed from the local copy."}},
+    {"@type": "Question", "name": "How do I check if my project has hidden Git or remote deps from transitive dependencies?", "acceptedAnswer": {"@type": "Answer", "text": "Run npm ls --all | grep -E \"(git+|https://.*\\.tgz)\" while on npm 11.16.0+. Warnings will flag any transitive Git or remote deps. You can also audit your lockfile with grep -r \"git+\" package-lock.json."}}
+  ]
+}
+</script>
+
+</body>
+</html>
