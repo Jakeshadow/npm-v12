@@ -429,6 +429,41 @@ mv npm-shrinkwrap.json package-lock.json
   <summary>How do I check if my project has hidden Git or remote deps from transitive dependencies?</summary>
   <div class="faq-answer"><p>Run <code>npm ls --all | grep -E "(git\+|https://.*\.tgz)"</code> while on npm 11.16.0+. Warnings will flag any transitive Git or remote deps. You can also audit your lockfile: <code>grep -r "git+" package-lock.json</code>.</p></div>
 </details>
+
+<details>
+  <summary>Why does npm install fail with "node-gyp rebuild failed" after upgrading to npm v12?</summary>
+  <div class="faq-answer"><p>npm v12 disables all lifecycle scripts by default — including the implicit <code>node-gyp rebuild</code> that compiles native addons. When a package has a <code>binding.gyp</code> file, npm used to auto-run node-gyp. Now it's blocked. Fix: run <code>npm approve-scripts --allow-scripts-pending</code> to see which packages need native compilation, then <code>npm approve-scripts &lt;package-name&gt;</code> for each one you trust (e.g., bcrypt, sharp, node-gyp itself). Or add <code>--allow-scripts</code> as a quick workaround during migration.</p></div>
+</details>
+
+<details>
+  <summary>Why do I get "cannot find module X.node" after npm install in v12?</summary>
+  <div class="faq-answer"><p>This error means a native addon failed to compile because its install script was blocked. The <code>.node</code> binary is produced by <code>node-gyp rebuild</code> which no longer runs by default. Check <code>npm approve-scripts --allow-scripts-pending</code> — the package with the missing <code>.node</code> file (e.g., <code>node-sass</code>, <code>bcrypt</code>) needs script approval. Once approved, re-run <code>npm install</code> and the native binary will be built.</p></div>
+</details>
+
+<details>
+  <summary>Why is my postinstall script blocked in npm v12?</summary>
+  <div class="faq-answer"><p>npm v12 flips the default: <strong>all</strong> lifecycle scripts (preinstall, install, postinstall) are blocked by default. This is the intended security behavior — npm won't run arbitrary code from dependencies without your explicit approval. To approve specific packages, use <code>npm approve-scripts &lt;name&gt;</code>. The approved list is stored in your <code>package.json</code> under <code>"scripts"</code>. Commit this file so your team and CI share the same allowlist.</p></div>
+</details>
+
+<details>
+  <summary>Why is --allow-scripts not working in npm v12?</summary>
+  <div class="faq-answer"><p>If <code>npm install --allow-scripts</code> doesn't seem to work, check two things: (1) You're running npm >= 11.11.0 — the <code>--allow-scripts</code> flag was added in that version and may behave differently in early releases. (2) In npm v12, <code>--allow-scripts</code> only enables the top-level install scripts, not transitive dependency scripts — you still need per-package approval for deep dependencies. Use <code>npm approve-scripts --allow-scripts-pending</code> to see the full list.</p></div>
+</details>
+
+<details>
+  <summary>Why is npm-shrinkwrap.json ignored / not loaded in npm v12?</summary>
+  <div class="faq-answer"><p><code>npm-shrinkwrap.json</code> is fully removed in v12 — the file is no longer read, loaded, or honored, even if it exists at the project root or inside published tarballs. Rename it to <code>package-lock.json</code>: <code>mv npm-shrinkwrap.json package-lock.json</code>. If you were shipping shrinkwrap inside a published package to lock dependency trees, switch to <code>bundleDependencies</code> in <code>package.json</code> instead.</p></div>
+</details>
+
+<details>
+  <summary>Why do Git dependencies fail with "git+https://" not resolving in npm v12?</summary>
+  <div class="faq-answer"><p>npm v12 blocks all Git-based dependencies (<code>git+https://</code>, <code>github:user/repo</code>) by default. You'll see errors like <code>npm ERR! Git dependency not allowed</code> or the install simply skips them. Fix: either add <code>--allow-git</code> to your <code>npm install</code> command, set <code>allow-git=true</code> in <code>.npmrc</code>, or (preferred) migrate Git dependencies to registry-published versions. Check your tree with <code>grep -r "git+" package.json package-lock.json</code>.</p></div>
+</details>
+
+<details>
+  <summary>Why does npm view --json return an array instead of an object in v12?</summary>
+  <div class="faq-answer"><p>npm v12 changed <code>npm view --json</code> output to always return an array, even for single-version queries. Scripts that parsed the old single-object format will break — e.g., <code>jq -r '.version'</code> needs to become <code>jq -r '.[0].version'</code>. Search your CI scripts and Makefiles for <code>npm view</code> combined with <code>--json</code> and update the JSON parsing accordingly.</p></div>
+</details>
 </section>
 
 </main>
@@ -477,7 +512,14 @@ mv npm-shrinkwrap.json package-lock.json
     {"@type": "Question", "name": "What about Yarn and pnpm? Do they have the same issues?", "acceptedAnswer": {"@type": "Answer", "text": "pnpm already supports per-package script allowlisting (via pnpm.onlyBuiltDependencies). Yarn 4+ has similar supply-chain protections. Both have had these controls for longer than npm."}},
     {"@type": "Question", "name": "The allow-remote flag was blocking registry tarballs — is that fixed?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. GitHub Issue #9347 tracked a bug where allow-remote=none blocked even standard npm registry downloads. Fixed in npm 11.15.0+. The flag correctly only blocks non-registry URLs now."}},
     {"@type": "Question", "name": "What if I still need npm-shrinkwrap.json for my published CLI tool?", "acceptedAnswer": {"@type": "Answer", "text": "Switch to bundleDependencies. Add \"bundleDependencies\": [\"dep-a\", \"dep-b\"] to package.json. When published, those deps are bundled in the tarball and installed from the local copy."}},
-    {"@type": "Question", "name": "How do I check if my project has hidden Git or remote deps from transitive dependencies?", "acceptedAnswer": {"@type": "Answer", "text": "Run npm ls --all | grep -E \"(git+|https://.*\\.tgz)\" while on npm 11.16.0+. Warnings will flag any transitive Git or remote deps. You can also audit your lockfile with grep -r \"git+\" package-lock.json."}}
+    {"@type": "Question", "name": "How do I check if my project has hidden Git or remote deps from transitive dependencies?", "acceptedAnswer": {"@type": "Answer", "text": "Run npm ls --all | grep -E \"(git+|https://.*\\.tgz)\" while on npm 11.16.0+. Warnings will flag any transitive Git or remote deps. You can also audit your lockfile with grep -r \"git+\" ,
+    {"@type": "Question", "name": "Why does npm install fail with node-gyp rebuild failed after upgrading to npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 disables all lifecycle scripts by default — including the implicit node-gyp rebuild that compiles native addons. Fix: run npm approve-scripts --allow-scripts-pending to see which packages need native compilation, then npm approve-scripts <package-name> for each one you trust. Or add --allow-scripts as a quick workaround during migration."}},
+    {"@type": "Question", "name": "Why do I get cannot find module X.node after npm install in v12?", "acceptedAnswer": {"@type": "Answer", "text": "This means a native addon failed to compile because its install script was blocked. The .node binary is produced by node-gyp rebuild which no longer runs by default. Run npm approve-scripts --allow-scripts-pending to find the package that needs script approval, approve it, and re-run npm install."}},
+    {"@type": "Question", "name": "Why is my postinstall script blocked in npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 blocks all lifecycle scripts (preinstall, install, postinstall) by default. This is intended security behavior. Use npm approve-scripts <name> to approve specific packages. The approved list is stored in package.json — commit it so your team and CI share the same allowlist."}},
+    {"@type": "Question", "name": "Why is --allow-scripts not working in npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "Two things to check: (1) You need npm >= 11.11.0 for the --allow-scripts flag. (2) In v12, --allow-scripts only enables top-level scripts, not transitive dependency scripts — use npm approve-scripts --allow-scripts-pending to see the full list."}},
+    {"@type": "Question", "name": "Why is npm-shrinkwrap.json ignored / not loaded in npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm-shrinkwrap.json is fully removed in v12 — the file is no longer read, even if it exists. Rename it to package-lock.json. If you were shipping shrinkwrap inside a published package, switch to bundleDependencies in package.json instead."}},
+    {"@type": "Question", "name": "Why do Git dependencies fail with git+https:// not resolving in npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 blocks all Git-based dependencies by default. Fix: add --allow-git to npm install, set allow-git=true in .npmrc, or (preferred) migrate Git deps to registry-published versions. Check your tree with grep -r git+ package.json."}},
+    {"@type": "Question", "name": "Why does npm view --json return an array instead of an object in v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 changed npm view --json to always return an array, even for single-version queries. Scripts parsing the old single-object format will break — jq -r .version needs to become jq -r .[0].version. Search CI scripts for npm view combined with --json and update JSON parsing accordingly."}}
   ]
 }
 </script>
