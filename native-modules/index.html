@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>npm v12 Native Module Compilation: node-gyp Fixes for bcrypt, sharp</title>
+<meta name="description" content="npm v12 disables implicit node-gyp rebuild. bcrypt, sharp, esbuild native binaries break. C++17 required. Fix with approve-scripts + platform-specific solutions.">
+<meta property="og:title" content="npm v12 Native Module Compilation: node-gyp Fixes for bcrypt, sharp">
+<meta property="og:description" content="npm v12 disables implicit node-gyp rebuild. C++17 required. Platform-specific fixes for Windows, Linux, macOS.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://npmv12guide.com/native-modules/">
+<meta property="og:site_name" content="npm v12 Guide">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="npm v12 Native Module Compilation Guide">
+<meta name="twitter:description" content="npm v12 disables implicit node-gyp rebuild. C++17 required. Fixes for bcrypt, sharp, esbuild.">
+<link rel="canonical" href="https://npmv12guide.com/native-modules/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
+  --danger: #f85149; --warn: #d2991d; --ok: #3fb950;
+  --code-bg: #1c2128; --radius: 6px; --max-w: 820px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.65;
+  padding: 0 1rem 3rem;
+}
+nav {
+  max-width: var(--max-w); margin: 0 auto; padding: 1.2rem 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .5rem;
+}
+nav a { color: var(--muted); text-decoration: none; font-size: .9rem; }
+nav a:hover { color: var(--accent); }
+.logo { font-weight: 600; color: var(--text); font-size: 1rem; }
+.logo span { color: var(--accent); }
+main { max-width: var(--max-w); margin: 0 auto; }
+.hero { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+h1 { font-size: 2rem; line-height: 1.3; margin-bottom: .6rem; }
+h2 { font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); }
+h3 { font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
+p { margin-bottom: 1rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+pre {
+  background: var(--code-bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem 1.2rem;
+  overflow-x: auto; font-size: .88rem; line-height: 1.55;
+  margin: .8rem 0 1.2rem; position: relative;
+}
+:not(pre) > code {
+  background: var(--code-bg); padding: .12rem .35rem;
+  border-radius: 3px; font-size: .85rem; border: 1px solid var(--border);
+}
+.breaking-change {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.2rem 1.4rem; margin: 1rem 0;
+}
+.breaking-change h3 { margin-top: 0; }
+.use-case {
+  background: var(--surface); border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1rem 1.3rem; margin: .8rem 0;
+}
+.use-case h3 { margin-top: 0; }
+.priority-tag {
+  display: inline-block; padding: .15rem .5rem; border-radius: 3px;
+  font-size: .75rem; font-weight: 600; margin-right: .4rem; vertical-align: middle;
+}
+.tag-p0 { color: var(--danger); background: rgba(248,81,73,.12); }
+.tag-p1 { color: var(--warn); background: rgba(210,153,29,.12); }
+details {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: .5rem;
+}
+summary {
+  padding: 1rem 1.2rem; cursor: pointer; list-style: none;
+  display: flex; justify-content: space-between; align-items: center;
+  font-weight: 500;
+}
+summary::before { content: '▸'; color: var(--muted); font-size: .85rem; margin-right: .6rem; flex-shrink: 0; }
+details[open] summary::before { content: '▾'; }
+.faq-answer { padding: 0 1.2rem 1rem 2.2rem; color: var(--muted); line-height: 1.6; }
+.copy-btn {
+  position: absolute; top: .5rem; right: .6rem;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--muted); font-size: .7rem; padding: .15rem .5rem;
+  border-radius: 3px; cursor: pointer;
+}
+.back-link {
+  display: inline-block; margin: 2rem 0 1rem;
+  padding: .5rem 1rem; border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--muted); font-size: .9rem;
+}
+.back-link:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+.other-changes {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.2rem 1.4rem; margin: 1rem 0;
+}
+.other-changes h3 { margin-top: 0; }
+footer {
+  max-width: var(--max-w); margin: 3rem auto 0; padding-top: 1.5rem;
+  border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem;
+}
+@media (max-width: 600px) {
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">npm<span>v12</span>guide</a>
+  <div>
+    <a href="/">Home</a> &nbsp;
+    <a href="/ci-cd/">CI/CD</a> &nbsp;
+    <a href="/native-modules/">Native Modules</a> &nbsp;
+    <a href="/monorepo/">Monorepo</a> &nbsp;
+    <a href="/rollback/">Rollback</a> &nbsp;
+    <a href="/vs-npm-11/">npm 11 vs 12</a>
+  </div>
+</nav>
+
+<main>
+
+<section class="hero">
+  <h1>npm v12 Native Module Compilation: node-gyp Fixes for bcrypt, sharp</h1>
+  <p style="font-size:1.1rem;color:var(--muted);max-width:640px;">
+    <strong style="color:var(--text);">npm v12 disables the implicit node-gyp rebuild. Your bcrypt, sharp, and esbuild native binaries won't compile unless you explicitly allow them.</strong>
+    Plus: C++17 is now required. If your compiler is pre-2017, native addon builds fail at the source level.
+  </p>
+</section>
+
+<section>
+<h2>Why Native Modules Break in npm v12</h2>
+
+<p>For 12 years, npm has automatically detected <code>binding.gyp</code> files and run <code>node-gyp rebuild</code> post-install. This worked — but it meant any package with a <code>binding.gyp</code> could execute arbitrary code during install. npm v12 closes this: <strong>zero postinstall scripts execute unless explicitly approved, per package</strong>.</p>
+
+<div class="breaking-change">
+  <h3>The Chain That Breaks</h3>
+  <p style="color:var(--muted);">
+    1. <code>npm install</code> downloads package<br>
+    2. Package has <code>"scripts": {"install": "node-gyp rebuild"}</code> or <code>binding.gyp</code><br>
+    3. npm 11: runs it automatically<br>
+    4. npm 12: <strong>skips it silently</strong><br>
+    5. Your app tries <code>require('bcrypt')</code> → <code>Cannot find module './lib/binding/napi-v3/bcrypt_lib.node'</code>
+  </p>
+</div>
+
+<p>The fix is simple in concept: approve trusted packages. The complexity is that every platform, every package, and every CI environment has its own gotchas.</p>
+</section>
+
+<section>
+<h2>node-gyp v12 Compatibility: C++17 Required</h2>
+
+<p>npm v12 bundles node-gyp 12.x, which requires a C++17 compiler. This is a <strong>hard requirement</strong> — native addons with C++11 or C++14 code paths will fail to compile.</p>
+
+<h3>Platform Toolchain Requirements</h3>
+
+<div class="use-case">
+  <h3>Linux</h3>
+  <p style="color:var(--muted);">
+    <strong>Minimum:</strong> gcc 8+ or clang 7+<br>
+    <strong>Ubuntu/Debian:</strong> <code>apt-get install build-essential python3</code> (Ubuntu 22.04+ ships gcc 11)<br>
+    <strong>Alpine:</strong> <code>apk add build-base python3</code><br>
+    <strong>CentOS/RHEL 7:</strong> Default gcc 4.8 — must install devtoolset-8: <code>yum install centos-release-scl && yum install devtoolset-8</code><br>
+    <strong>Verify:</strong> <code>gcc --version | head -1</code> should show ≥ 8.0
+  </p>
+</div>
+
+<div class="use-case">
+  <h3>Windows</h3>
+  <p style="color:var(--muted);">
+    <strong>Minimum:</strong> Visual Studio 2022 with "Desktop development with C++" workload<br>
+    <strong>Alternative:</strong> <code>npm install -g windows-build-tools</code> (installs VS Build Tools + Python)<br>
+    <strong>npm config:</strong> <code>npm config set msvs_version 2022</code><br>
+    <strong>Common error:</strong> <code>MSBuild.exe not found</code> — VS 2022 Build Tools not installed or PATH not set<br>
+    <strong>Verify:</strong> <code>npm config get msvs_version</code> should return "2022"
+  </p>
+</div>
+
+<div class="use-case">
+  <h3>macOS</h3>
+  <p style="color:var(--muted);">
+    <strong>Minimum:</strong> Xcode 14+ Command Line Tools<br>
+    <strong>Install:</strong> <code>xcode-select --install</code><br>
+    <strong>Apple Silicon (arm64):</strong> Native compilation works; cross-compilation from x64 to arm64 requires <code>--target_arch=arm64</code><br>
+    <strong>CI note:</strong> GitHub Actions macOS runners need <code>sudo xcode-select -s /Applications/Xcode.app</code> to accept license
+  </p>
+</div>
+</section>
+
+<section>
+<h2>Per-Package Fix Guide</h2>
+
+<div class="use-case">
+  <h3>bcrypt</h3>
+  <p style="color:var(--muted);">
+    <strong>What breaks:</strong> C++ addon compilation via <code>node-gyp rebuild</code><br>
+    <strong>Fix:</strong> <code>npm approve-scripts bcrypt</code> — one-time approval, persists in <code>package.json</code><br>
+    <strong>CI fix:</strong> Add <code>npm approve-scripts bcrypt</code> before <code>npm test</code> in your CI workflow<br>
+    <strong>C++17 note:</strong> bcrypt 5.x+ uses N-API, compiles with any C++17 compiler. If you're on bcrypt 3.x, upgrade.<br>
+    <strong>Alternative:</strong> <code>bcryptjs</code> (pure JS, no native deps) — 30% slower but zero compilation headaches
+  </p>
+</div>
+
+<div class="use-case">
+  <h3>sharp</h3>
+  <p style="color:var(--muted);">
+    <strong>What breaks:</strong> libvips native binding compilation<br>
+    <strong>Fix:</strong> <code>npm approve-scripts sharp</code><br>
+    <strong>Prebuilt binaries:</strong> sharp ships prebuilt binaries for most platforms. If you're on x64 Linux/macOS/Windows, you may not need compilation at all — but the script still needs approval for the install check<br>
+    <strong>libvips dependency:</strong> On Linux, prebuilt binaries bundle libvips. On Alpine, install <code>apk add vips-dev</code> for source fallback<br>
+    <strong>Verify:</strong> <code>node -e "console.log(require('sharp').versions)"</code>
+  </p>
+</div>
+
+<div class="use-case">
+  <h3>esbuild</h3>
+  <p style="color:var(--muted);">
+    <strong>What breaks:</strong> Native Go binary installation script<br>
+    <strong>Fix:</strong> <code>npm approve-scripts esbuild</code><br>
+    <strong>Good news:</strong> esbuild ships platform-specific binaries — the "script" just picks the right one. No C++ compiler needed.<br>
+    <strong>Postinstall:</strong> If you see warnings about esbuild's <code>postinstall</code>, it's downloading the binary, not compiling. Safe to approve.
+  </p>
+</div>
+
+<div class="use-case">
+  <h3>node-sass (deprecated — migrate)</h3>
+  <p style="color:var(--muted);">
+    <strong>What breaks:</strong> C++ binding to LibSass<br>
+    <strong>Short-term:</strong> <code>npm approve-scripts node-sass</code><br>
+    <strong>Recommended:</strong> Migrate to <code>sass</code> (dart-sass). node-sass is deprecated, and its C++ compilation chain is fragile on npm v12 + C++17. Migration: <code>npm uninstall node-sass && npm install sass</code>. The API is mostly compatible — <code>sass.renderSync()</code> → <code>sass.compileString()</code>.
+  </p>
+</div>
+
+<div class="use-case">
+  <h3>Puppeteer</h3>
+  <p style="color:var(--muted);">
+    <strong>What breaks:</strong> Chromium download postinstall script<br>
+    <strong>Fix:</strong> <code>npm approve-scripts puppeteer</code><br>
+    <strong>CI note:</strong> Puppeteer's download can add 300MB to CI runs. Install <code>puppeteer-core</code> instead if you provide Chromium separately (e.g., via <code>@sparticuz/chromium</code> on Lambda).
+  </p>
+</div>
+</section>
+
+<section>
+<h2>Common Native Module Errors</h2>
+
+<div class="breaking-change">
+  <h3><span class="priority-tag tag-p0">P0</span> "Cannot find module X.node" after npm install</h3>
+  <p style="color:var(--muted);">npm v12 skipped the native build script. Fix: <code>npm approve-scripts &lt;pkg&gt;</code> then reinstall. <strong>Pro tip:</strong> Run <code>npm ls --depth=0 2>&1 | grep -E '(sharp|bcrypt|esbuild|node-sass)'</code> to find all native deps in your project, then approve each one.</p>
+</div>
+
+<div class="breaking-change">
+  <h3><span class="priority-tag tag-p0">P0</span> node-gyp rebuild failed: C++17 required</h3>
+  <p style="color:var(--muted);">Your compiler is too old. Error message: <code>error: no template named 'string_view' in namespace 'std'</code> or <code>error: 'if constexpr' requires C++17</code>. Fix: upgrade gcc to 8+, install VS 2022 on Windows, or Xcode 14+ on macOS.</p>
+</div>
+
+<div class="breaking-change">
+  <h3><span class="priority-tag tag-p1">P1</span> NODE_MODULE_VERSION mismatch</h3>
+  <p style="color:var(--muted);">The .node binary was compiled for a different Node.js version. Error: <code>was compiled against a different Node.js version using NODE_MODULE_VERSION XX</code>. Fix: <code>npm rebuild &lt;pkg&gt;</code> to recompile against your current Node.js version. If using Docker, make sure the Node.js version in the build stage matches the runtime stage.</p>
+</div>
+
+<div class="breaking-change">
+  <h3><span class="priority-tag tag-p1">P1</span> MSBuild.exe not found on Windows</h3>
+  <p style="color:var(--muted);">Visual Studio Build Tools are missing or npm can't find them. Fix: <code>npm install -g windows-build-tools</code> or install "Desktop development with C++" from Visual Studio 2022. Then <code>npm config set msvs_version 2022</code>.</p>
+</div>
+
+<div class="breaking-change">
+  <h3><span class="priority-tag tag-p1">P1</span> GLIBCXX version mismatch on Linux</h3>
+  <p style="color:var(--muted);">Prebuilt binary was compiled with a newer libstdc++ than your system has. Error: <code>/lib64/libstdc++.so.6: version GLIBCXX_3.4.26 not found</code>. Fix: either compile from source (<code>npm rebuild &lt;pkg&gt; --build-from-source</code>) or update your system's libstdc++ (<code>apt-get install libstdc++6</code> on Ubuntu 22.04+).</p>
+</div>
+</section>
+
+<section>
+<h2>Bulk Approval Script</h2>
+
+<p>For monorepos or projects with many native deps, approve them all at once:</p>
+<pre><span class="copy-btn">copy</span># Find all packages with install/preinstall/postinstall scripts or binding.gyp
+npx detect-native-modules 2>/dev/null || npm ls --depth=0 --json 2>/dev/null | \
+  node -e "
+const data=JSON.parse(require('fs').readFileSync(0,'utf8'));
+function findNative(deps){
+  if(!deps) return [];
+  return Object.entries(deps).filter(([k,v])=>
+    (v.peerMissing!==true && (v._resolved && v._resolved.includes('git+')))
+  ).map(([k])=>k);
+}
+// Approve common native packages
+['sharp','bcrypt','esbuild','puppeteer','node-sass','node-gyp'].forEach(p=>{
+  try{require(p); console.log('✓',p,'already present')}
+  catch(e){console.log('−',p,'not installed')}
+});
+"</pre>
+</section>
+
+<section>
+<h2>FAQ</h2>
+
+<details>
+  <summary>Why does bcrypt fail to install on npm v12?</summary>
+  <div class="faq-answer"><p>bcrypt's <code>install</code> script (which runs <code>node-gyp rebuild</code>) is blocked by npm v12's new script policy. Fix: <code>npm approve-scripts bcrypt</code> then <code>npm install</code>. After approval, bcrypt works identically. If you're still on bcrypt 3.x, upgrade to 5.x for N-API support and better C++17 compatibility.</p></div>
+</details>
+
+<details>
+  <summary>How do I approve native modules in a monorepo?</summary>
+  <div class="faq-answer"><p>The <code>npm approve-scripts</code> must be run <em>from each workspace directory</em> — the root allowlist does not propagate. Script: <code>for ws in $(npm ls --workspaces --json 2>/dev/null | node -e "process.stdin.on('data',d=>JSON.parse(d).forEach(w=>console.log(w)))"); do cd $ws && npm approve-scripts &lt;pkg&gt;; done</code>. Or install <code>npm approve-scripts</code> at the root with <code>--workspaces</code> if your npm version supports it.</p></div>
+</details>
+
+<details>
+  <summary>node-gyp rebuild succeeds locally but fails in Docker</summary>
+  <div class="faq-answer"><p>Your Docker image is missing build tools. <code>node:XX-slim</code> images intentionally omit gcc/g++/python. Add to Dockerfile: <code>apt-get install -y build-essential python3</code>. For Alpine: <code>apk add build-base python3</code>. Also check that the Node.js version in your Dockerfile matches what the native module was prebuilt for.</p></div>
+</details>
+
+<details>
+  <summary>Do I need C++17 for all native modules or just some?</summary>
+  <div class="faq-answer"><p>node-gyp 12.x <em>requires</em> C++17 for compilation itself, regardless of what the native addon uses. Even if a package only uses C++11 features, the node-gyp build system needs a C++17-capable compiler. The good news: most packages (sharp, esbuild, puppeteer) ship prebuilt binaries and don't compile anything — they just need the install script approved so the binary download runs.</p></div>
+</details>
+
+<details>
+  <summary>sharp installs but won't run after npm v12 upgrade</summary>
+  <div class="faq-answer"><p>Sharp's prebuilt binary was downloaded but the install script (which validates it) was skipped. Run <code>npm approve-scripts sharp && npm rebuild sharp</code>. If that fails, sharp is trying to compile from source — check that libvips is installed (<code>apt-get install libvips-dev</code> on Debian/Ubuntu) and your C++17 compiler is available.</p></div>
+</details>
+
+<details>
+  <summary>How to find all native modules in my project before upgrading?</summary>
+  <div class="faq-answer"><p>Run <code>npm ls --depth=99 --json 2>/dev/null | node -e "const d=JSON.parse(require('fs').readFileSync(0,'utf8'));function walk(deps){const n=[];if(!deps)return n;for(const[k,v]of Object.entries(deps)){try{const p=require(k+'/package.json');if(p.scripts&&(p.scripts.install||p.scripts.preinstall||p.scripts.postinstall))n.push(k+': '+Object.keys(p.scripts).filter(s=>['install','preinstall','postinstall'].includes(s)).join(', '))}catch(e){}};return n}console.log(walk(d.dependencies).join('\n')||'No native modules found')"</code>. Also check for <code>binding.gyp</code> files: <code>find node_modules -name 'binding.gyp' -maxdepth 3 2>/dev/null</code>.</p></div>
+</details>
+</section>
+
+<section style="margin-top:3rem;text-align:center;">
+  <p style="color:var(--muted);">Related Guides:</p>
+  <a href="/ci-cd/" class="back-link" style="margin:.3rem;">CI/CD Pipeline</a>
+  <a href="/monorepo/" class="back-link" style="margin:.3rem;">Monorepo Guide</a>
+  <a href="/rollback/" class="back-link" style="margin:.3rem;">Rollback Strategies</a>
+  <a href="/" class="back-link" style="margin:.3rem;">← Migration Guide</a>
+</section>
+
+</main>
+
+<footer>
+  <p><a href="/">npmv12guide.com</a> — npm v12 breaking changes migration guide. Native modules, CI/CD, monorepo, rollback.</p>
+  <p style="margin-top:.5rem;">
+    <a href="/privacy/">Privacy</a> &middot;
+    <a href="/terms/">Terms</a>
+  </p>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "npm v12 Native Module Compilation: node-gyp Fixes for bcrypt, sharp",
+  "description": "npm v12 disables implicit node-gyp rebuild. bcrypt, sharp, esbuild native binaries break. C++17 required. Fix with approve-scripts.",
+  "datePublished": "2026-06-13",
+  "dateModified": "2026-06-13",
+  "author": {"@type": "Organization", "name": "npmv12guide"},
+  "isAccessibleForFree": true,
+  "isPartOf": {"@type": "WebSite", "url": "https://npmv12guide.com/", "name": "npm v12 Guide"},
+  "sameAs": ["https://github.com/npm/cli"]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "npm v12 Guide",
+  "url": "https://npmv12guide.com",
+  "description": "npm v12 breaking changes migration guide — dependency scripts, Git deps, shrinkwrap fixes",
+  "sameAs": ["https://github.com/npm/cli"]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "npm v12 Guide",
+  "url": "https://npmv12guide.com",
+  "description": "npm v12 migration guide: breaking changes, migration checklist, vs npm 11 comparison",
+  "inLanguage": "en"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://npmv12guide.com/"},
+    {"@type": "ListItem", "position": 2, "name": "Native Module Compilation", "item": "https://npmv12guide.com/native-modules/"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Why does bcrypt fail to install on npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "bcrypt's install script (which runs node-gyp rebuild) is blocked by npm v12's new script policy. Fix: npm approve-scripts bcrypt then npm install. After approval, bcrypt works identically. Upgrade to 5.x for N-API support and better C++17 compatibility."}},
+    {"@type": "Question", "name": "How do I approve native modules in a monorepo?", "acceptedAnswer": {"@type": "Answer", "text": "npm approve-scripts must be run from each workspace directory — the root allowlist does not propagate. Script over all workspaces or install npm approve-scripts at the root with --workspaces if your npm version supports it."}},
+    {"@type": "Question", "name": "node-gyp rebuild succeeds locally but fails in Docker", "acceptedAnswer": {"@type": "Answer", "text": "Your Docker image is missing build tools. node:XX-slim images omit gcc/g++/python. Add to Dockerfile: apt-get install -y build-essential python3. For Alpine: apk add build-base python3."}},
+    {"@type": "Question", "name": "Do I need C++17 for all native modules or just some?", "acceptedAnswer": {"@type": "Answer", "text": "node-gyp 12.x requires C++17 for compilation itself, regardless of what the native addon uses. Most packages (sharp, esbuild, puppeteer) ship prebuilt binaries and don't compile anything — they just need the install script approved so the binary download runs."}},
+    {"@type": "Question", "name": "sharp installs but won't run after npm v12 upgrade", "acceptedAnswer": {"@type": "Answer", "text": "Sharp's prebuilt binary was downloaded but the install script was skipped. Run npm approve-scripts sharp && npm rebuild sharp. If that fails, sharp is compiling from source — check libvips is installed and C++17 compiler is available."}},
+    {"@type": "Question", "name": "How to find all native modules in my project before upgrading?", "acceptedAnswer": {"@type": "Answer", "text": "Check for packages with install/preinstall/postinstall scripts in package.json, and search for binding.gyp files: find node_modules -name 'binding.gyp' -maxdepth 3. Common native modules: bcrypt, sharp, esbuild, node-sass, puppeteer, node-gyp."}}
+  ]
+}
+</script>
+
+</body>
+</html>
