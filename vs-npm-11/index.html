@@ -12,8 +12,15 @@
 <meta property="og:site_name" content="npm v12 Guide">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="npm 11 vs 12: Breaking Changes Compared">
-<meta name="twitter:description" content="npm 12 turns off dependency scripts, blocks Git deps, drops shrinkwrap. Side-by-side comparison.">
+  <meta property="og:image" content="https://npmv12guide.com/assets/og-image.svg">
+  <meta name="twitter:image" content="https://npmv12guide.com/assets/og-image.svg">
+  <meta name="twitter:description" content="npm 12 turns off dependency scripts, blocks Git deps, drops shrinkwrap. Side-by-side comparison.">
 <link rel="canonical" href="https://npmv12guide.com/vs-npm-11/">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
@@ -186,10 +193,6 @@ footer {
   <td class="v11"><span class="tag-no">No built-in mechanism</span></td>
   <td class="v12"><span class="tag-yes"><code>npm approve-scripts</code></span> — per-package allowlist in <code>package.json</code> <span class="tag-new">NEW</span></td>
 </tr>
-<tr>
-  <td>Darknet/Caffe support</td>
-  <td class="v11"><span class="tag-yes">Available</span></td>
-  <td class="v12"><span class="tag-no">Gone</span> — must convert models to ONNX first</td>
 </tr>
 </tbody>
 </table>
@@ -309,9 +312,6 @@ footer {
 
 <details>
   <summary>Which npm 12 breaking changes will actually affect me?</summary>
-  <div class="faq-answer"><p><strong>P0 (will break you):</strong> allowScripts off — if you have ANY native dependencies (bcrypt, sharp, esbuild, node-sass), your build fails. <strong>P1 (may break you):</strong> Git deps blocked if you use <code>git+https://</code> deps; shrinkwrap removal if you publish CLI tools; <code>npm view</code> JSON format change if your CI parses it. <strong>P2 (unlikely):</strong> remote URL deps, C API removal, Darknet/Caffe parsers gone. <a href="/#breaking-changes">Full breakdown →</a></p></div>
-</details>
-
 <details>
   <summary>Is npm 12 faster than npm 11?</summary>
   <div class="faq-answer"><p>npm 12 is primarily a <strong>security release</strong>, not a performance release. Install speed should be similar to npm 11. The main change is that <em>fewer things happen during install</em> (scripts don't run, Git deps don't resolve, remote URLs don't download), which can actually make installs <em>faster</em> in some cases — but that's a side effect, not the goal.</p></div>
@@ -401,7 +401,7 @@ footer {
   "@type": "FAQPage",
   "mainEntity": [
     {"@type": "Question", "name": "Do I have to upgrade from npm 11 to 12?", "acceptedAnswer": {"@type": "Answer", "text": "Not immediately, but eventually yes. Once Node.js LTS lines bundle npm 12 (estimated late 2026), you'll get v12 automatically when you upgrade Node.js. You can pin npm 11 as a short-term workaround. Prepare on npm 11.16.0+ now, migrate on your schedule."}},
-    {"@type": "Question", "name": "Which npm 12 breaking changes will actually affect me?", "acceptedAnswer": {"@type": "Answer", "text": "P0: allowScripts off — if you have any native dependencies (bcrypt, sharp, esbuild), your build fails. P1: Git deps blocked, shrinkwrap removal, npm view JSON format change. P2: remote URL deps, C API removal, Darknet/Caffe parsers."}},
+    {"@type": "Question", "name": "Which npm 12 breaking changes will actually affect me?", "acceptedAnswer": {"@type": "Answer", "text": "P0: allowScripts off — if you have any native dependencies (bcrypt, sharp, esbuild), your build fails. P1: Git deps blocked, shrinkwrap removal, npm view JSON format change. P2: remote URL deps, npm command removals (star/unstar/adduser)."}},
     {"@type": "Question", "name": "Is npm 12 faster than npm 11?", "acceptedAnswer": {"@type": "Answer", "text": "npm 12 is primarily a security release, not a performance release. Install speed should be similar to npm 11. Fewer things happen during install (scripts don't run, Git deps don't resolve), which can make installs faster as a side effect."}},
     {"@type": "Question", "name": "What about pnpm and Yarn? How do they compare?", "acceptedAnswer": {"@type": "Answer", "text": "Both pnpm and Yarn 4+ already have per-package script allowlisting. npm 12 is catching up to the security posture pnpm and Yarn have had for years."}},
     {"@type": "Question", "name": "Can I test npm 12 behavior without installing it?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Install npm 11.16.0+ and run npm install — it will show warnings previewing v12 behavior (which scripts would be blocked, which Git/remote deps would fail). No changes are enforced, but you can see exactly what will break."}}
