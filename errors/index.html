@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>npm v12 Errors: Fix "allowScripts disabled" &amp; 12 Common Breakages</title>
+<meta name="description" content="Fix npm v12 errors fast: allowScripts disabled, Git deps blocked, remote URLs blocked, native module failures. Error message → fix, copy-paste ready.">
+<meta property="og:title" content="npm v12 Errors: Fix "allowScripts disabled" & 12 Common Breakages">
+<meta property="og:description" content="Every npm v12 error with the exact fix. Copy-paste the config, move on.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://npmv12guide.com/errors/">
+<meta property="og:site_name" content="npm v12 Guide">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="npm v12 Errors: Fix "allowScripts disabled" & 12 Common Breakages">
+  <meta property="og:image" content="https://npmv12guide.com/assets/og-image.svg">
+  <meta name="twitter:image" content="https://npmv12guide.com/assets/og-image.svg">
+  <meta name="twitter:description" content="Every npm v12 error with the exact fix. Copy-paste ready.">
+<link rel="canonical" href="https://npmv12guide.com/errors/">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
+  --danger: #f85149; --warn: #d2991d; --ok: #3fb950;
+  --code-bg: #1c2128; --radius: 6px; --max-w: 820px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.65;
+  padding: 0 1rem 3rem;
+}
+nav {
+  max-width: var(--max-w); margin: 0 auto; padding: 1.2rem 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .5rem;
+}
+nav a { color: var(--muted); text-decoration: none; font-size: .9rem; }
+nav a:hover { color: var(--accent); }
+.logo { font-weight: 600; color: var(--text); font-size: 1rem; }
+.logo span { color: var(--accent); }
+main { max-width: var(--max-w); margin: 0 auto; }
+.hero { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+h1 { font-size: 2rem; line-height: 1.3; margin-bottom: .6rem; }
+h2 { font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); }
+h3 { font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
+p { margin-bottom: 1rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+pre {
+  background: var(--code-bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem 1.2rem;
+  overflow-x: auto; font-size: .88rem; line-height: 1.55;
+  margin: .8rem 0 1.2rem; position: relative;
+}
+:not(pre) > code {
+  background: var(--code-bg); padding: .12rem .35rem;
+  border-radius: 3px; font-size: .85rem; border: 1px solid var(--border);
+}
+.callout {
+  background: var(--surface); border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1rem 1.3rem; margin: 1rem 0;
+}
+.callout.warn { border-left-color: var(--warn); }
+.callout.ok { border-left-color: var(--ok); }
+.callout.danger { border-left-color: var(--danger); }
+.error-block {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); margin: 1.2rem 0;
+  overflow: hidden;
+}
+.error-msg {
+  background: rgba(248,81,73,.08); border-bottom: 1px solid var(--border);
+  padding: .8rem 1.2rem; font-family: 'Roboto Mono', monospace;
+  font-size: .85rem; color: var(--danger);
+}
+.error-body { padding: 1rem 1.2rem; }
+.error-body h4 { font-size: .95rem; margin-bottom: .4rem; }
+.error-body p { color: var(--muted); font-size: .9rem; margin-bottom: .6rem; }
+.error-body pre { margin: .6rem 0 0; }
+details {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: .8rem 1rem; margin: .5rem 0;
+}
+details summary { cursor: pointer; font-weight: 500; }
+.faq-answer { padding-top: .6rem; color: var(--muted); font-size: .93rem; }
+footer {
+  max-width: var(--max-w); margin: 3rem auto 0;
+  padding-top: 1.5rem; border-top: 1px solid var(--border);
+  color: var(--muted); font-size: .85rem; text-align: center;
+}
+nav .current { color: var(--text); font-weight: 500; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.5rem; }
+  pre { font-size: .8rem; padding: .8rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">npm v12 <span>Guide</span></a>
+  <div>
+    <a href="/">Changes</a>
+    <a href="/vs-npm-11/" style="margin-left:1rem;">vs v11</a>
+    <a href="/performance/" style="margin-left:1rem;">Performance</a>
+    <a href="/errors/" style="margin-left:1rem;" class="current">Errors</a>
+  </div>
+</nav>
+
+<main>
+
+<section class="hero">
+  <h1>npm v12 broke your <code style="font-size:1.2rem;">npm install</code>. Here's the fix.</h1>
+  <p style="color:var(--muted);font-size:1.1rem;line-height:1.6;">Every error message you'll hit upgrading to v12 — with the exact command or config to fix it. <strong style="color:var(--text);">Copy, paste, move on.</strong></p>
+</section>
+
+<!-- Quick Reference -->
+<section>
+<h2>Quick Reference: The 3 Config Lines That Fix 80% of Errors</h2>
+<p>Most v12 errors come from three new defaults. If you just want your CI green <em>now</em> and plan to audit later:</p>
+
+<pre><code># .npmrc — restores pre-v12 behavior (not recommended long-term)
+allow-scripts=true
+allow-git-deps=true
+allow-remote-deps=true</code></pre>
+
+<div class="callout warn">
+  <strong>This is a temporary fix.</strong> These defaults exist to close supply-chain attack vectors. The goal is to migrate to explicit approvals — each error below shows the surgical fix instead of the global override.
+</div>
+</section>
+
+<!-- Error Catalog -->
+<section>
+<h2>Error Catalog</h2>
+
+<!-- Error 1 -->
+<div class="error-block">
+  <div class="error-msg">npm error Cannot run scripts for &lt;package&gt; — allowScripts is disabled</div>
+  <div class="error-body">
+    <h4>What it means</h4>
+    <p>v12 no longer runs <code>preinstall</code>, <code>install</code>, or <code>postinstall</code> scripts automatically. This is the #1 breaking change — it blocks native module compilation (<code>node-gyp rebuild</code>) for packages like bcrypt, sharp, esbuild, and Puppeteer.</p>
+    <h4>Fix (per-package approval — recommended)</h4>
+    <pre><code># List all packages that need script approval
+npm approve-scripts --allow-scripts-pending
+
+# Approve a specific package
+npm approve-scripts --allow-scripts bcrypt sharp esbuild
+
+# Or approve everything detected (audit later)
+npm approve-scripts --allow-scripts-all</code></pre>
+    <h4>Fix (global override — temporary)</h4>
+    <pre><code># .npmrc
+allow-scripts=true</code></pre>
+  </div>
+</div>
+
+<!-- Error 2 -->
+<div class="error-block">
+  <div class="error-msg">npm error Git dependencies are not allowed: git://github.com/user/repo.git</div>
+  <div class="error-body">
+    <h4>What it means</h4>
+    <p>v12 blocks <code>git://</code>, <code>git+ssh://</code>, <code>git+https://</code>, and <code>github:user/repo</code> dependencies by default. Git deps can override the Git executable path via <code>.npmrc</code> — a code-execution vector that bypasses even <code>--ignore-scripts</code>.</p>
+    <h4>Fix (per-install flag)</h4>
+    <pre><code>npm install --allow-git</code></pre>
+    <h4>Fix (permanent config for private repos)</h4>
+    <pre><code># .npmrc
+allow-git-deps=true</code></pre>
+    <p style="color:var(--muted);font-size:.85rem;">Better: migrate private packages to a registry (GitHub Packages, Verdaccio, or npm private registry). Git deps skip integrity verification.</p>
+  </div>
+</div>
+
+<!-- Error 3 -->
+<div class="error-block">
+  <div class="error-msg">npm error Remote URL dependencies are not allowed: https://example.com/package.tgz</div>
+  <div class="error-body">
+    <h4>What it means</h4>
+    <p>v12 blocks dependencies that point to remote tarball URLs. These URLs are unverifiable — the tarball content can change between installs with no integrity check.</p>
+    <h4>Fix (per-install flag)</h4>
+    <pre><code>npm install --allow-remote</code></pre>
+    <h4>Fix (permanent)</h4>
+    <pre><code># .npmrc
+allow-remote-deps=true</code></pre>
+    <p style="color:var(--muted);font-size:.85rem;">Better: publish the package to a registry or use a local file dependency with an integrity hash.</p>
+  </div>
+</div>
+
+<!-- Error 4 -->
+<div class="error-block">
+  <div class="error-msg">npm error npm-shrinkwrap.json is no longer supported</div>
+  <div class="error-body">
+    <h4>What it means</h4>
+    <p>v12 drops support for <code>npm-shrinkwrap.json</code>. If you have both a shrinkwrap and a <code>package-lock.json</code>, v11 already ignored the shrinkwrap — v12 removes it entirely.</p>
+    <h4>Fix</h4>
+    <pre><code># Convert shrinkwrap to package-lock.json
+rm npm-shrinkwrap.json
+npm install --package-lock-only</code></pre>
+    <p style="color:var(--muted);font-size:.85rem;">The generated <code>package-lock.json</code> uses lockfile v3, which is backward-compatible with npm v10/v11.</p>
+  </div>
+</div>
+
+<!-- Error 5 -->
+<div class="error-block">
+  <div class="error-msg">npm error code EACCES — errno -4094 — syscall mkdir</div>
+  <div class="error-body">
+    <h4>What it means</h4>
+    <p>v12 enforces stricter filesystem permissions on the cache directory. If your CI cache path has wrong ownership (common when switching between root and non-root CI runners), v12 refuses to write.</p>
+    <h4>Fix</h4>
+    <pre><code># Use an absolute cache path (v12 requirement)
+npm config set cache /home/runner/.npm
+
+# Fix ownership on existing cache
+sudo chown -R $(whoami) ~/.npm</code></pre>
+  </div>
+</div>
+
+<!-- Error 6 -->
+<div class="error-block">
+  <div class="error-msg">npm error code EINTEGRITY — sha512 integrity check failed</div>
+  <div class="error-body">
+    <h4>What it means</h4>
+    <p>v12's content-addressable cache uses SHA-512 verification. A corrupt cache entry (partial download, disk error, or registry serving different content under the same version) triggers this.</p>
+    <h4>Fix</h4>
+    <pre><code># Clear the corrupt entry and re-fetch
+npm cache clean --force
+npm install</code></pre>
+    <p style="color:var(--muted);font-size:.85rem;">If the error persists after cache clean, the registry may have republished the package with different content — check the package's npm page for a recent publish.</p>
+  </div>
+</div>
+
+<!-- Error 7 -->
+<div class="error-block">
+  <div class="error-msg">npm error Cannot find module — native addon not built for Node.js v22</div>
+  <div class="error-body">
+    <h4>What it means</h4>
+    <p>With <code>allowScripts</code> off, native modules (<code>node-gyp</code>, <code>prebuild-install</code>) don't compile. Even with scripts on, a Node.js major version bump means prebuilt binaries may not exist yet.</p>
+    <h4>Fix</h4>
+    <pre><code># 1. Ensure scripts are approved for the native package
+npm approve-scripts --allow-scripts bcrypt
+
+# 2. Force rebuild
+npm rebuild bcrypt
+
+# 3. If prebuilt binaries don't exist for your Node version:
+npm install bcrypt --build-from-source</code></pre>
+  </div>
+</div>
+
+<!-- Error 8 -->
+<div class="error-block">
+  <div class="error-msg">npm error code ERESOLVE — unable to resolve dependency tree</div>
+  <div class="error-body">
+    <h4>What it means</h4>
+    <p>v12 tightens peer dependency resolution. In v11, conflicting peer dependencies produced warnings. v12 may error on the same tree — especially if you're using <code>--legacy-peer-deps</code> as a permanent workaround.</p>
+    <h4>Fix</h4>
+    <pre><code># See what's conflicting
+npm ls --depth=0 2>&1 | grep -E "UNMET|peer dep"
+
+# Option A: Accept the override (v12 compatible)
+npm install --legacy-peer-deps
+
+# Option B: Fix the actual conflicts
+npm install package@version --save-exact
+
+# Option C: Override nested deps (package.json)
+"overrides": {
+  "react": "^19.0.0"
+}</code></pre>
+  </div>
+</div>
+
+<!-- Error 9 -->
+<div class="error-block">
+  <div class="error-msg">npm error Cannot read properties of null (reading 'package')</div>
+  <div class="error-body">
+    <h4>What it means</h4>
+    <p>v12's arborist resolver is stricter about malformed <code>node_modules</code> trees. If your <code>node_modules</code> has orphaned symlinks or partially-installed packages (from a killed <code>npm install</code>), v12 may crash instead of silently repairing.</p>
+    <h4>Fix</h4>
+    <pre><code># Start fresh
+rm -rf node_modules
+npm install</code></pre>
+  </div>
+</div>
+
+<!-- Error 10 -->
+<div class="error-block">
+  <div class="error-msg">npm error Workspace not found: packages/&lt;name&gt;</div>
+  <div class="error-body">
+    <h4>What it means</h4>
+    <p>v12 changed how workspaces are resolved. If your <code>package.json</code> <code>workspaces</code> glob doesn't match any directories, v12 errors instead of silently skipping.</p>
+    <h4>Fix</h4>
+    <pre><code># Verify globs resolve
+npm ls --workspaces --depth=0
+
+# Check your package.json workspaces config:
+"workspaces": [
+  "packages/*"    // Make sure this path exists
+]</code></pre>
+  </div>
+</div>
+</section>
+
+<!-- CI-Specific -->
+<section>
+<h2>CI/CD: Errors You'll Only See in Pipelines</h2>
+
+<div class="error-block">
+  <div class="error-msg">npm error Missing script: "build" / "test" — lifecycle scripts are disabled</div>
+  <div class="error-body">
+    <h4>What it means</h4>
+    <p>Your CI runs <code>npm run build</code> or <code>npm test</code> but v12's script blocking also covers <em>your own project's</em> scripts if <code>ignore-scripts=true</code> is set. This happens when a global <code>.npmrc</code> or CI base image sets it.</p>
+    <h4>Fix</h4>
+    <pre><code># Check what's set
+npm config list | grep scripts
+
+# If ignore-scripts=true is present, remove it:
+npm config delete ignore-scripts
+
+# Or override in your CI step:
+npm install --no-ignore-scripts</code></pre>
+  </div>
+</div>
+
+<div class="error-block">
+  <div class="error-msg">npm error cache path must be absolute — got ".npm"</div>
+  <div class="error-body">
+    <h4>What it means</h4>
+    <p>v12 rejects relative cache paths. Many CI configs use <code>cache: .npm</code> — v12 silently falls back to the default location, which means your CI cache is never actually used.</p>
+    <h4>Fix</h4>
+    <pre><code># CI config: use $CI_PROJECT_DIR or $GITHUB_WORKSPACE
+npm config set cache "$CI_PROJECT_DIR/.npm"   # GitLab CI
+npm config set cache "$GITHUB_WORKSPACE/.npm"  # GitHub Actions</code></pre>
+  </div>
+</div>
+</section>
+
+<!-- Prevention -->
+<section>
+<h2>Prevent Errors Before They Happen</h2>
+
+<div class="callout ok">
+  <h3>The v12-Ready .npmrc Template</h3>
+  <p style="color:var(--muted);">Drop this in your project root. It makes v12 behavior explicit — no surprises when Node.js LTS bundles v12.</p>
+  <pre><code># v12-ready .npmrc
+# Explicitly declare what your project needs
+
+# Scripts: list approved packages
+allow-scripts=pkg1 pkg2 pkg3
+
+# Git deps: only if you actually use them
+# allow-git-deps=true
+
+# Remote deps: almost never needed
+# allow-remote-deps=true
+
+# Cache: absolute path for CI
+cache=/home/runner/.npm
+
+# Audit: run separately, not during install
+audit=false
+fund=false</code></pre>
+</div>
+</section>
+
+<!-- FAQ -->
+<section>
+<h2>FAQ</h2>
+
+<details>
+  <summary>How do I know which packages need script approval?</summary>
+  <div class="faq-answer"><p>Run <code>npm approve-scripts --allow-scripts-pending</code>. It lists every package in your tree that has install/postinstall scripts. Most will be native modules — bcrypt, sharp, esbuild, Puppeteer, node-sass, sqlite3, etc. A typical Next.js project has 8–15 packages with scripts.</p></div>
+</details>
+
+<details>
+  <summary>My CI passed v11 but fails v12. What changed?</summary>
+  <div class="faq-answer"><p>Three things, in order of likelihood: (1) a native dependency no longer compiles because <code>allowScripts</code> is off — approve it, (2) you have a Git dependency in <code>package.json</code> — add <code>--allow-git</code>, (3) your CI cache path is relative — switch to absolute. Check the error message — it tells you exactly which of the three it is.</p></div>
+</details>
+
+<details>
+  <summary>Can I test v12 behavior without installing v12?</summary>
+  <div class="faq-answer"><p>Yes. npm v11.16.0+ surfaces v12 deprecation warnings during install. Run <code>npm install --foreground-scripts</code> to see them. Or install the pre-release: <code>npm install -g npm@12.0.0-pre.0.0</code>.</p></div>
+</details>
+
+<details>
+  <summary>Does v12 affect <code>npx</code>?</summary>
+  <div class="faq-answer"><p>No. <code>npx</code> behavior is unchanged. The script blocking only applies to <code>npm install</code> lifecycle scripts, not to the command you pass to <code>npx</code>.</p></div>
+</details>
+
+<details>
+  <summary>Will <code>npm ci</code> still work?</summary>
+  <div class="faq-answer"><p>Yes, with the same caveats. <code>npm ci</code> respects <code>allowScripts</code> — if a package in your lockfile has install scripts and isn't approved, <code>npm ci</code> will skip them. For CI, either approve the scripts explicitly or set <code>allow-scripts=true</code> in your CI <code>.npmrc</code>.</p></div>
+</details>
+</section>
+
+<section style="margin-top:3rem;text-align:center;">
+  <p style="color:var(--muted);">Related Guides:</p>
+  <a href="/performance/" style="margin:.3rem;">Performance Guide</a>
+  <a href="/ci-cd/" style="margin:.3rem;">CI/CD Pipeline</a>
+  <a href="/vs-npm-11/" style="margin:.3rem;">v11 vs v12</a>
+  <a href="/" style="margin:.3rem;">← Migration Guide</a>
+</section>
+
+</main>
+
+<footer>
+  <p><a href="/">npmv12guide.com</a> — npm v12 migration and performance guide. Independent community resource.</p>
+  <p style="margin-top:.5rem;">
+    <a href="/privacy/">Privacy</a> &middot;
+    <a href="/terms/">Terms</a>
+  </p>
+</footer>
+</body>
+</html>
