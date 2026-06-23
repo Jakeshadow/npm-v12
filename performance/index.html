@@ -12,109 +12,39 @@
 <meta property="og:site_name" content="npm v12 Guide">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Tired of Slow npm install? — npm v12 Performance Guide">
-  <meta property="og:image" content="https://installsafe.dev/assets/og-image.svg">
-  <meta name="twitter:image" content="https://installsafe.dev/assets/og-image.svg">
-  <meta name="twitter:description" content="Cut npm install times by 30–50% with v12's parallel fetch and new cache architecture.">
+<meta property="og:image" content="https://installsafe.dev/assets/og-image.svg">
+<meta name="twitter:image" content="https://installsafe.dev/assets/og-image.svg">
+<meta name="twitter:description" content="Cut npm install times by 30–50% with v12's parallel fetch and new cache architecture.">
 <link rel="canonical" href="https://installsafe.dev/performance/">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
-<style>
-:root {
-  --bg: #0d1117; --surface: #161b22; --border: #30363d;
-  --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
-  --danger: #f85149; --warn: #d2991d; --ok: #3fb950;
-  --code-bg: #1c2128; --radius: 6px; --max-w: 820px;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  background: var(--bg); color: var(--text); line-height: 1.65;
-  padding: 0 1rem 3rem;
-}
-nav {
-  max-width: var(--max-w); margin: 0 auto; padding: 1.2rem 0;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: .5rem;
-}
-nav a { color: var(--muted); text-decoration: none; font-size: .9rem; }
-nav a:hover { color: var(--accent); }
-.logo { font-weight: 600; color: var(--text); font-size: 1rem; }
-.logo span { color: var(--accent); }
-main { max-width: var(--max-w); margin: 0 auto; }
-.hero { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
-h1 { font-size: 2rem; line-height: 1.3; margin-bottom: .6rem; }
-h2 { font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); }
-h3 { font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
-p { margin-bottom: 1rem; }
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
-pre {
-  background: var(--code-bg); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1rem 1.2rem;
-  overflow-x: auto; font-size: .88rem; line-height: 1.55;
-  margin: .8rem 0 1.2rem; position: relative;
-}
-:not(pre) > code {
-  background: var(--code-bg); padding: .12rem .35rem;
-  border-radius: 3px; font-size: .85rem; border: 1px solid var(--border);
-}
-table {
-  width: 100%; border-collapse: collapse; margin: 1rem 0;
-  border: 1px solid var(--border); border-radius: var(--radius);
-}
-th, td {
-  padding: .7rem 1rem; text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-th { background: var(--surface); font-weight: 600; font-size: .9rem; }
-td { font-size: .9rem; }
-tr:last-child td { border-bottom: none; }
-.callout {
-  background: var(--surface); border-left: 3px solid var(--accent);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 1rem 1.3rem; margin: 1rem 0;
-}
-.callout.warn { border-left-color: var(--warn); }
-.callout.ok { border-left-color: var(--ok); }
-.bench-number {
-  font-family: 'Google Sans', sans-serif;
-  font-size: 1.8rem; font-weight: 700; color: var(--ok);
-}
-.bench-label { color: var(--muted); font-size: .85rem; }
-details {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: .8rem 1rem; margin: .5rem 0;
-}
-details summary { cursor: pointer; font-weight: 500; }
-.faq-answer { padding-top: .6rem; color: var(--muted); font-size: .93rem; }
-</style>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<nav>
-  <a href="/" class="logo">npm v12 <span>Guide</span></a>
-  <div>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">npm<span style="color:var(--accent);">v12</span>guide</a>
+  <div class="nav-links">
     <a href="/">Changes</a>
-    <a href="/vs-npm-11/" style="margin-left:1rem;">vs v11</a>
-    <a href="/performance/" style="margin-left:1rem;">Performance</a>
-    <a href="/errors/" style="margin-left:1rem;">Errors</a>
+    <a href="/vs-npm-11/">vs v11</a>
+    <a href="/performance/">Performance</a>
+    <a href="/errors/">Errors</a>
   </div>
 </nav>
 
 <main>
+
 <section class="hero">
   <h1>Tired of watching <code style="font-size:1.2rem;">npm install</code> crawl in CI?</h1>
-  <p style="color:var(--muted);font-size:1.1rem;line-height:1.6;">npm v12's parallel fetch, content-addressable cache, and slimmer resolver cut cold installs by <strong style="color:var(--ok);">30–50%</strong> — with zero config changes for most projects.</p>
+  <p style="color:var(--text-muted);font-size:1.1rem;line-height:1.6;">npm v12's parallel fetch, content-addressable cache, and slimmer resolver cut cold installs by <strong style="color:var(--ok);">30–50%</strong> — with zero config changes for most projects.</p>
 </section>
 
-<!-- How It Works -->
 <section>
 <h2>How npm v12 Gets Faster</h2>
 <p>Three components changed under the hood. None require you to change a single line of config — they're on by default.</p>
@@ -122,23 +52,22 @@ details summary { cursor: pointer; font-weight: 500; }
 <div class="callout">
   <h3>1. Parallel Package Fetch (pacote)</h3>
   <p>npm v11 fetched packages sequentially — one tarball at a time, even with a fast connection. npm v12 fetches up to <strong>16 packages in parallel</strong>. On a project with 800+ dependencies, the network wait time drops from ~45 seconds to ~8 seconds on a typical CI connection.</p>
-  <p style="color:var(--muted);font-size:.85rem;">Relevant: <a href="https://github.com/npm/pacote">npm/pacote</a> — the package fetcher npm uses internally</p>
+  <p style="color:var(--text-muted);font-size:.85rem;">Relevant: <a href="https://github.com/npm/pacote">npm/pacote</a> — the package fetcher npm uses internally</p>
 </div>
 
 <div class="callout">
   <h3>2. Content-Addressable Cache v2 (cacache)</h3>
   <p>npm's cache now uses SHA-512 indexing instead of URL-based keys. Two packages that share the same tarball (even from different registries) are stored once, not twice. For monorepos, this eliminates duplicate fetches across workspaces — each package is downloaded exactly once, then hard-linked.</p>
-  <p style="color:var(--muted);font-size:.85rem;">Relevant: <a href="https://github.com/npm/cacache">npm/cacache</a> — the cache that backs <code>~/.npm/_cacache</code></p>
+  <p style="color:var(--text-muted);font-size:.85rem;">Relevant: <a href="https://github.com/npm/cacache">npm/cacache</a> — the cache that backs <code>~/.npm/_cacache</code></p>
 </div>
 
 <div class="callout">
   <h3>3. Slimmer Dependency Resolution (arborist)</h3>
   <p>arborist v12 skips metadata re-fetch for packages already in cache with valid integrity hashes. In v11, every <code>npm install</code> re-validated metadata for the full tree. v12 checks the cache first, hits the registry only when the cached entry is stale. Warm installs (package.json unchanged, node_modules deleted) are up to <strong>60% faster</strong>.</p>
-  <p style="color:var(--muted);font-size:.85rem;">Relevant: <a href="https://github.com/npm/arborist">npm/arborist</a> — npm's dependency tree resolver</p>
+  <p style="color:var(--text-muted);font-size:.85rem;">Relevant: <a href="https://github.com/npm/arborist">npm/arborist</a> — npm's dependency tree resolver</p>
 </div>
 </section>
 
-<!-- Comparison Table -->
 <section>
 <h2>npm v11 vs v12: Install Speed by Scenario</h2>
 <p>All numbers measured on a 500-dependency Next.js project, 100 Mbps connection, NVMe SSD. Your numbers will vary — but the <em>ratio</em> between v11 and v12 is what matters.</p>
@@ -157,10 +86,9 @@ details summary { cursor: pointer; font-weight: 500; }
   </tbody>
 </table>
 </div>
-<p style="color:var(--muted);font-size:.85rem;">Measured on npm v11.4.2 vs v12.0.0-pre.0.0. Each scenario run 5 times, warmest 3 averaged. Source: <a href="https://github.com/npm/cli">npm/cli</a> benchmarks.</p>
+<p style="color:var(--text-muted);font-size:.85rem;">Measured on npm v11.4.2 vs v12.0.0-pre.0.0. Each scenario run 5 times, warmest 3 averaged. Source: <a href="https://github.com/npm/cli">npm/cli</a> benchmarks.</p>
 </section>
 
-<!-- CI/CD section -->
 <section>
 <h2>CI/CD: How to Cache npm v12 for Maximum Speed</h2>
 <p>The biggest win is in CI. v12's cache is more compact and deterministic — cache hit rates improve by ~20% because cache keys don't change when registry URLs do.</p>
@@ -191,7 +119,6 @@ before_script:
 </div>
 </section>
 
-<!-- What didn't get faster -->
 <section>
 <h2>What's NOT Faster (Yet)</h2>
 <p>Honesty matters. Don't expect these to improve:</p>
@@ -209,7 +136,6 @@ before_script:
 </div>
 </section>
 
-<!-- FAQ -->
 <section>
 <h2>FAQ</h2>
 
@@ -240,16 +166,16 @@ before_script:
 </section>
 
 <section style="margin-top:3rem;text-align:center;">
-  <p style="color:var(--muted);">Related Guides:</p>
-  <a href="/errors/" style="margin:.3rem;">Common Errors &amp; Fixes</a>
-  <a href="/ci-cd/" style="margin:.3rem;">CI/CD Pipeline</a>
-  <a href="/vs-npm-11/" style="margin:.3rem;">v11 vs v12</a>
-  <a href="/" style="margin:.3rem;">← Migration Guide</a>
+  <p style="color:var(--text-muted);">Related Guides:</p>
+  <a href="/errors/" class="back-link" style="margin:.3rem;">Common Errors &amp; Fixes</a>
+  <a href="/ci-cd/" class="back-link" style="margin:.3rem;">CI/CD Pipeline</a>
+  <a href="/vs-npm-11/" class="back-link" style="margin:.3rem;">v11 vs v12</a>
+  <a href="/" class="back-link" style="margin:.3rem;">← Migration Guide</a>
 </section>
 
 </main>
 
-<footer>
+<footer class="footer">
   <p><a href="/">installsafe.dev</a> — npm v12 migration and performance guide. Independent community resource.</p>
   <p style="margin-top:.5rem;">
     <a href="/privacy/">Privacy</a> &middot;

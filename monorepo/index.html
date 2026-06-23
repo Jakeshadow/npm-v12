@@ -12,136 +12,30 @@
 <meta property="og:site_name" content="npm v12 Guide">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="npm v12 Monorepo Migration Guide">
-  <meta property="og:image" content="https://installsafe.dev/assets/og-image.svg">
-  <meta name="twitter:image" content="https://installsafe.dev/assets/og-image.svg">
-  <meta name="twitter:description" content="Monorepo migration for npm v12: workspaces, script allowlists, lerna/nx integration.">
+<meta property="og:image" content="https://installsafe.dev/assets/og-image.svg">
+<meta name="twitter:image" content="https://installsafe.dev/assets/og-image.svg">
+<meta name="twitter:description" content="Monorepo migration for npm v12: workspaces, script allowlists, lerna/nx integration.">
 <link rel="canonical" href="https://installsafe.dev/monorepo/">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
-<style>
-:root {
-  --bg: #0d1117; --surface: #161b22; --border: #30363d;
-  --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
-  --danger: #f85149; --warn: #d2991d; --ok: #3fb950;
-  --code-bg: #1c2128; --radius: 6px; --max-w: 820px;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  background: var(--bg); color: var(--text); line-height: 1.65;
-  padding: 0 1rem 3rem;
-}
-nav {
-  max-width: var(--max-w); margin: 0 auto; padding: 1.2rem 0;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: .5rem;
-}
-nav a { color: var(--muted); text-decoration: none; font-size: .9rem; }
-nav a:hover { color: var(--accent); }
-.logo { font-weight: 600; color: var(--text); font-size: 1rem; }
-.logo span { color: var(--accent); }
-main { max-width: var(--max-w); margin: 0 auto; }
-.hero { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
-h1 { font-size: 2rem; line-height: 1.3; margin-bottom: .6rem; }
-h2 { font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); }
-h3 { font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
-p { margin-bottom: 1rem; }
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
-pre {
-  background: var(--code-bg); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1rem 1.2rem;
-  overflow-x: auto; font-size: .88rem; line-height: 1.55;
-  margin: .8rem 0 1.2rem; position: relative;
-}
-:not(pre) > code {
-  background: var(--code-bg); padding: .12rem .35rem;
-  border-radius: 3px; font-size: .85rem; border: 1px solid var(--border);
-}
-.breaking-change {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1.2rem 1.4rem; margin: 1rem 0;
-}
-.breaking-change h3 { margin-top: 0; }
-.use-case {
-  background: var(--surface); border-left: 3px solid var(--accent);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 1rem 1.3rem; margin: .8rem 0;
-}
-.use-case h3 { margin-top: 0; }
-.priority-tag {
-  display: inline-block; padding: .15rem .5rem; border-radius: 3px;
-  font-size: .75rem; font-weight: 600; margin-right: .4rem; vertical-align: middle;
-}
-.tag-p0 { color: var(--danger); background: rgba(248,81,73,.12); }
-.tag-p1 { color: var(--warn); background: rgba(210,153,29,.12); }
-.checklist {
-  list-style: none; padding: 0; counter-reset: step;
-}
-.checklist li {
-  counter-increment: step; background: var(--surface);
-  border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 1rem 1.3rem; margin-bottom: .6rem;
-  display: flex; align-items: flex-start; gap: .8rem;
-}
-.checklist li::before {
-  content: counter(step); min-width: 1.8rem; height: 1.8rem;
-  background: var(--code-bg); border: 1px solid var(--border);
-  border-radius: 4px; display: inline-flex; align-items: center;
-  justify-content: center; font-size: .85rem; font-weight: 600;
-  flex-shrink: 0;
-}
-details {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); margin-bottom: .5rem;
-}
-summary {
-  padding: 1rem 1.2rem; cursor: pointer; list-style: none;
-  display: flex; justify-content: space-between; align-items: center;
-  font-weight: 500;
-}
-summary::before { content: '▸'; color: var(--muted); font-size: .85rem; margin-right: .6rem; flex-shrink: 0; }
-details[open] summary::before { content: '▾'; }
-.faq-answer { padding: 0 1.2rem 1rem 2.2rem; color: var(--muted); line-height: 1.6; }
-.copy-btn {
-  position: absolute; top: .5rem; right: .6rem;
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--muted); font-size: .7rem; padding: .15rem .5rem;
-  border-radius: 3px; cursor: pointer;
-}
-.back-link {
-  display: inline-block; margin: 2rem 0 1rem;
-  padding: .5rem 1rem; border: 1px solid var(--border);
-  border-radius: var(--radius); color: var(--muted); font-size: .9rem;
-}
-.back-link:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
-footer {
-  max-width: var(--max-w); margin: 3rem auto 0; padding-top: 1.5rem;
-  border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem;
-}
-@media (max-width: 600px) {
-  h1 { font-size: 1.5rem; }
-}
-</style>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
-<nav>
-  <a href="/" class="logo">npm<span>v12</span>guide</a>
-  <div>
-    <a href="/">Home</a> &nbsp;
-    <a href="/ci-cd/">CI/CD</a> &nbsp;
-    <a href="/native-modules/">Native Modules</a> &nbsp;
-    <a href="/monorepo/">Monorepo</a> &nbsp;
-    <a href="/rollback/">Rollback</a> &nbsp;
+<nav class="nav">
+  <a href="/" class="nav-logo">npm<span style="color:var(--accent);">v12</span>guide</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/ci-cd/">CI/CD</a>
+    <a href="/native-modules/">Native Modules</a>
+    <a href="/monorepo/">Monorepo</a>
+    <a href="/rollback/">Rollback</a>
     <a href="/vs-npm-11/">npm 11 vs 12</a>
   </div>
 </nav>
@@ -150,8 +44,8 @@ footer {
 
 <section class="hero">
   <h1>npm v12 Monorepo Migration: Workspaces, Script Allowlists, Git Dependencies</h1>
-  <p style="font-size:1.1rem;color:var(--muted);max-width:640px;">
-    <strong style="color:var(--text);">Monorepos have unique pain in npm v12.</strong>
+  <p style="font-size:1.1rem;color:var(--text-muted);max-width:640px;">
+    <strong>Monorepos have unique pain in npm v12.</strong>
     Each workspace needs its own script allowlist — the root doesn't propagate. Git dependencies are common for cross-package references. And the root <code>.npmrc</code> doesn't cascade the way you'd expect. Here's how to migrate a monorepo without breaking every package at once.
   </p>
 </section>
@@ -161,17 +55,17 @@ footer {
 
 <div class="breaking-change">
   <h3><span class="priority-tag tag-p0">P0</span> Workspace Allowlists Don't Cascade</h3>
-  <p style="color:var(--muted);">The biggest monorepo surprise: <code>npm approve-scripts &lt;pkg&gt;</code> in the root <strong>does not apply to workspaces</strong>. Each workspace is an independent install scope with its own <code>package.json</code> allowlist. If workspace <code>packages/api</code> depends on <code>bcrypt</code> and workspace <code>packages/worker</code> also depends on <code>bcrypt</code>, you must approve it in <em>both</em> workspaces.</p>
+  <p style="color:var(--text-muted);">The biggest monorepo surprise: <code>npm approve-scripts &lt;pkg&gt;</code> in the root <strong>does not apply to workspaces</strong>. Each workspace is an independent install scope with its own <code>package.json</code> allowlist. If workspace <code>packages/api</code> depends on <code>bcrypt</code> and workspace <code>packages/worker</code> also depends on <code>bcrypt</code>, you must approve it in <em>both</em> workspaces.</p>
 </div>
 
 <div class="breaking-change">
   <h3><span class="priority-tag tag-p1">P1</span> Git Dependencies Are Common in Monorepos</h3>
-  <p style="color:var(--muted);">Monorepos frequently use <code>git+https://</code> for pre-release cross-references or internal forks. npm v12 blocks these by default. Even if your direct deps are clean, a transitive dependency might pull in a Git reference — and your entire <code>npm ci</code> fails.</p>
+  <p style="color:var(--text-muted);">Monorepos frequently use <code>git+https://</code> for pre-release cross-references or internal forks. npm v12 blocks these by default. Even if your direct deps are clean, a transitive dependency might pull in a Git reference — and your entire <code>npm ci</code> fails.</p>
 </div>
 
 <div class="breaking-change">
   <h3><span class="priority-tag tag-p1">P1</span> Root .npmrc Doesn't Cascade</h3>
-  <p style="color:var(--muted);">Expectation: set <code>allow-git=true</code> in root <code>.npmrc</code> and all workspaces inherit it. Reality: npm workspaces have their own config resolution. The root <code>.npmrc</code> affects <em>root-level</em> operations; each workspace resolves its own effective config.</p>
+  <p style="color:var(--text-muted);">Expectation: set <code>allow-git=true</code> in root <code>.npmrc</code> and all workspaces inherit it. Reality: npm workspaces have their own config resolution. The root <code>.npmrc</code> affects <em>root-level</em> operations; each workspace resolves its own effective config.</p>
 </div>
 </section>
 
@@ -181,15 +75,15 @@ footer {
 <h3>Step-by-Step: Approve Scripts Across All Workspaces</h3>
 
 <ol class="checklist">
-  <li><span><strong>Audit all native deps across workspaces.</strong><br><span style="color:var(--muted);"><code>npm ls --workspaces --depth=0 2>/dev/null | grep -E '(sharp|bcrypt|esbuild|node-sass|puppeteer)'</code></span></span></li>
-  <li><span><strong>For each workspace with native deps:</strong><br><span style="color:var(--muted);"><code>cd packages/api && npm approve-scripts bcrypt</code></span></span></li>
-  <li><span><strong>Verify allowlist is committed:</strong><br><span style="color:var(--muted);">Check <code>package.json</code> in each workspace has <code>"scriptsApproved"</code> field</span></span></li>
-  <li><span><strong>Test install from root:</strong><br><span style="color:var(--muted);"><code>npm ci --workspaces</code> — all native modules should compile</span></span></li>
-  <li><span><strong>Add smoke tests:</strong><br><span style="color:var(--muted);">In CI: <code>node -e "require('bcrypt'); require('sharp');"</code> in each workspace</span></span></li>
+  <li><span><strong>Audit all native deps across workspaces.</strong><br><span style="color:var(--text-muted);"><code>npm ls --workspaces --depth=0 2>/dev/null | grep -E '(sharp|bcrypt|esbuild|node-sass|puppeteer)'</code></span></span></li>
+  <li><span><strong>For each workspace with native deps:</strong><br><span style="color:var(--text-muted);"><code>cd packages/api && npm approve-scripts bcrypt</code></span></span></li>
+  <li><span><strong>Verify allowlist is committed:</strong><br><span style="color:var(--text-muted);">Check <code>package.json</code> in each workspace has <code>"scriptsApproved"</code> field</span></span></li>
+  <li><span><strong>Test install from root:</strong><br><span style="color:var(--text-muted);"><code>npm ci --workspaces</code> — all native modules should compile</span></span></li>
+  <li><span><strong>Add smoke tests:</strong><br><span style="color:var(--text-muted);">In CI: <code>node -e "require('bcrypt'); require('sharp');"</code> in each workspace</span></span></li>
 </ol>
 
 <h3>Automation Script</h3>
-<pre><span class="copy-btn">copy</span>#!/bin/bash
+<pre>#!/bin/bash
 # approve-scripts-workspaces.sh — approve scripts across all workspaces
 
 APPROVE_LIST=("node-gyp" "sharp" "esbuild" "bcrypt")
@@ -222,27 +116,26 @@ echo "Done. Run: git diff --stat to review allowlist changes"</pre>
 
 <section>
 <h2>Git Dependency Alternatives</h2>
-
 <p>npm v12 blocks Git deps. In monorepos, these are often used for cross-package references during development. Here are your migration paths, best to worst:</p>
 
 <div class="use-case">
   <h3>Best: npm Workspaces Protocol (<code>workspace:*</code>)</h3>
-  <p style="color:var(--muted);">Replace <code>"@myorg/api": "git+https://github.com/myorg/repo.git#feat-branch"</code> with <code>"@myorg/api": "workspace:*"</code>. Only works for packages <em>within the same monorepo</em> listed in root <code>workspaces</code> config. Zero overhead, no extra tooling.</p>
+  <p style="color:var(--text-muted);">Replace <code>"@myorg/api": "git+https://github.com/myorg/repo.git#feat-branch"</code> with <code>"@myorg/api": "workspace:*"</code>. Only works for packages <em>within the same monorepo</em> listed in root <code>workspaces</code> config. Zero overhead, no extra tooling.</p>
 </div>
 
 <div class="use-case">
   <h3>Good: Verdaccio (Local Registry Mirror)</h3>
-  <p style="color:var(--muted);">Run a local npm registry that mirrors your private packages. Git deps become standard registry deps. Verdaccio runs in Docker, caches upstream, and lets you publish pre-release versions of workspace packages. <code>docker run -d -p 4873:4873 verdaccio/verdaccio</code>.</p>
+  <p style="color:var(--text-muted);">Run a local npm registry that mirrors your private packages. Git deps become standard registry deps. Verdaccio runs in Docker, caches upstream, and lets you publish pre-release versions of workspace packages. <code>docker run -d -p 4873:4873 verdaccio/verdaccio</code>.</p>
 </div>
 
 <div class="use-case">
   <h3>OK: <code>file:</code> Dependencies (Same Repo Only)</h3>
-  <p style="color:var(--muted);">Replace <code>"@myorg/api": "git+https://..."</code> with <code>"@myorg/api": "file:../packages/api"</code>. Works for local development, but the dependency is resolved as a symlink — the resolved version isn't locked in <code>package-lock.json</code>.</p>
+  <p style="color:var(--text-muted);">Replace <code>"@myorg/api": "git+https://..."</code> with <code>"@myorg/api": "file:../packages/api"</code>. Works for local development, but the dependency is resolved as a symlink — the resolved version isn't locked in <code>package-lock.json</code>.</p>
 </div>
 
 <div class="use-case">
   <h3>Short-Term: <code>--allow-git</code> Flag</h3>
-  <p style="color:var(--muted);">Add <code>allow-git=true</code> to <code>.npmrc</code>. This buys time, but npm's security team explicitly recommends against long-term reliance. Use this while you migrate Git deps to one of the above solutions.</p>
+  <p style="color:var(--text-muted);">Add <code>allow-git=true</code> to <code>.npmrc</code>. This buys time, but npm's security team explicitly recommends against long-term reliance. Use this while you migrate Git deps to one of the above solutions.</p>
 </div>
 </section>
 
@@ -251,12 +144,12 @@ echo "Done. Run: git diff --stat to review allowlist changes"</pre>
 
 <div class="use-case">
   <h3>lerna + npm v12</h3>
-  <p style="color:var(--muted);"><strong>Impact:</strong> lerna delegates to npm for install. When lerna runs <code>npm install</code> in each package directory, npm v12 blocks scripts. <strong>Fix:</strong> Approve scripts in each package <em>before</em> lerna bootstrap. Or set <code>"npmClient": "npm"</code> in <code>lerna.json</code> and ensure workspaces are configured for npm v12.</p>
+  <p style="color:var(--text-muted);"><strong>Impact:</strong> lerna delegates to npm for install. When lerna runs <code>npm install</code> in each package directory, npm v12 blocks scripts. <strong>Fix:</strong> Approve scripts in each package <em>before</em> lerna bootstrap. Or set <code>"npmClient": "npm"</code> in <code>lerna.json</code> and ensure workspaces are configured for npm v12.</p>
 </div>
 
 <div class="use-case">
   <h3>nx + npm v12</h3>
-  <p style="color:var(--muted);"><strong>Impact:</strong> nx uses the system npm. When nx orchestrates tasks across packages, native module compilation can fail silently. <strong>Fix:</strong> Add a pre-task hook in <code>nx.json</code> that runs <code>npm approve-scripts</code> for known native deps before any build task. Or migrate script approvals to <code>package.json</code> and commit them — nx then picks up the approved state automatically.</p>
+  <p style="color:var(--text-muted);"><strong>Impact:</strong> nx uses the system npm. When nx orchestrates tasks across packages, native module compilation can fail silently. <strong>Fix:</strong> Add a pre-task hook in <code>nx.json</code> that runs <code>npm approve-scripts</code> for known native deps before any build task. Or migrate script approvals to <code>package.json</code> and commit them — nx then picks up the approved state automatically.</p>
 </div>
 </section>
 
@@ -265,17 +158,17 @@ echo "Done. Run: git diff --stat to review allowlist changes"</pre>
 
 <div class="breaking-change">
   <h3>"Root allow-scripts doesn't apply to workspaces"</h3>
-  <p style="color:var(--muted);">You approved <code>sharp</code> at the monorepo root, but <code>packages/image-service</code> still fails to compile. This is by design — workspaces are independent install scopes. Run <code>npm approve-scripts sharp</code> from <em>within</em> each workspace that depends on it.</p>
+  <p style="color:var(--text-muted);">You approved <code>sharp</code> at the monorepo root, but <code>packages/image-service</code> still fails to compile. This is by design — workspaces are independent install scopes. Run <code>npm approve-scripts sharp</code> from <em>within</em> each workspace that depends on it.</p>
 </div>
 
 <div class="breaking-change">
   <h3>"Transitive Git dep from workspace breaks whole install"</h3>
-  <p style="color:var(--muted);">Workspace A has a clean dependency on package B, but B's <code>package-lock.json</code> references a Git dep. npm v12 blocks it and the entire <code>npm ci --workspaces</code> fails. Audit with: <code>grep -r 'git+https://' packages/*/package-lock.json</code>. Fix: migrate transitive Git deps to registry versions, or add <code>allow-git=true</code> as temporary escape hatch.</p>
+  <p style="color:var(--text-muted);">Workspace A has a clean dependency on package B, but B's <code>package-lock.json</code> references a Git dep. npm v12 blocks it and the entire <code>npm ci --workspaces</code> fails. Audit with: <code>grep -r 'git+https://' packages/*/package-lock.json</code>. Fix: migrate transitive Git deps to registry versions, or add <code>allow-git=true</code> as temporary escape hatch.</p>
 </div>
 
 <div class="breaking-change">
   <h3>"npm ls shows missing packages after v12 upgrade"</h3>
-  <p style="color:var(--muted);">Packages appear in <code>package.json</code> but <code>npm ls</code> doesn't show them. This happens when a workspace's native module script was blocked — the package is "installed" (files downloaded) but the native binary doesn't exist. <code>npm ls</code> shows what compiled successfully. Fix: approve and rebuild.</p>
+  <p style="color:var(--text-muted);">Packages appear in <code>package.json</code> but <code>npm ls</code> doesn't show them. This happens when a workspace's native module script was blocked — the package is "installed" (files downloaded) but the native binary doesn't exist. <code>npm ls</code> shows what compiled successfully. Fix: approve and rebuild.</p>
 </div>
 </section>
 
@@ -314,7 +207,7 @@ echo "Done. Run: git diff --stat to review allowlist changes"</pre>
 </section>
 
 <section style="margin-top:3rem;text-align:center;">
-  <p style="color:var(--muted);">Related Guides:</p>
+  <p style="color:var(--text-muted);">Related Guides:</p>
   <a href="/rollback/" class="back-link" style="margin:.3rem;">Rollback Strategies</a>
   <a href="/native-modules/" class="back-link" style="margin:.3rem;">Native Module Fixes</a>
   <a href="/ci-cd/" class="back-link" style="margin:.3rem;">CI/CD Pipeline</a>
@@ -323,7 +216,7 @@ echo "Done. Run: git diff --stat to review allowlist changes"</pre>
 
 </main>
 
-<footer>
+<footer class="footer">
   <p><a href="/">installsafe.dev</a> — npm v12 breaking changes migration guide. Monorepo, CI/CD, native modules, rollback.</p>
   <p style="margin-top:.5rem;">
     <a href="/privacy/">Privacy</a> &middot;
@@ -356,7 +249,6 @@ echo "Done. Run: git diff --stat to review allowlist changes"</pre>
   "sameAs": ["https://github.com/npm/cli"]
 }
 </script>
-
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

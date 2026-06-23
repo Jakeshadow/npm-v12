@@ -12,120 +12,30 @@
 <meta property="og:site_name" content="npm v12 Guide">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="npm v12 Rollback & Pin Guide">
-  <meta property="og:image" content="https://installsafe.dev/assets/og-image.svg">
-  <meta name="twitter:image" content="https://installsafe.dev/assets/og-image.svg">
-  <meta name="twitter:description" content="Stay on npm 11: pin, override, rollback. Team migration strategy included.">
+<meta property="og:image" content="https://installsafe.dev/assets/og-image.svg">
+<meta name="twitter:image" content="https://installsafe.dev/assets/og-image.svg">
+<meta name="twitter:description" content="Stay on npm 11: pin, override, rollback. Team migration strategy included.">
 <link rel="canonical" href="https://installsafe.dev/rollback/">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
-<style>
-:root {
-  --bg: #0d1117; --surface: #161b22; --border: #30363d;
-  --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
-  --danger: #f85149; --warn: #d2991d; --ok: #3fb950;
-  --code-bg: #1c2128; --radius: 6px; --max-w: 820px;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  background: var(--bg); color: var(--text); line-height: 1.65;
-  padding: 0 1rem 3rem;
-}
-nav {
-  max-width: var(--max-w); margin: 0 auto; padding: 1.2rem 0;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: .5rem;
-}
-nav a { color: var(--muted); text-decoration: none; font-size: .9rem; }
-nav a:hover { color: var(--accent); }
-.logo { font-weight: 600; color: var(--text); font-size: 1rem; }
-.logo span { color: var(--accent); }
-main { max-width: var(--max-w); margin: 0 auto; }
-.hero { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
-h1 { font-size: 2rem; line-height: 1.3; margin-bottom: .6rem; }
-h2 { font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); }
-h3 { font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
-p { margin-bottom: 1rem; }
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
-pre {
-  background: var(--code-bg); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1rem 1.2rem;
-  overflow-x: auto; font-size: .88rem; line-height: 1.55;
-  margin: .8rem 0 1.2rem; position: relative;
-}
-:not(pre) > code {
-  background: var(--code-bg); padding: .12rem .35rem;
-  border-radius: 3px; font-size: .85rem; border: 1px solid var(--border);
-}
-.rollback {
-  background: rgba(248,81,73,.06); border: 1px solid rgba(248,81,73,.2);
-  border-radius: var(--radius); padding: 1.2rem 1.4rem; margin: 1rem 0;
-}
-.rollback h3 { margin-top: 0; }
-.use-case {
-  background: var(--surface); border-left: 3px solid var(--accent);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 1rem 1.3rem; margin: .8rem 0;
-}
-.use-case h3 { margin-top: 0; }
-.decision {
-  background: var(--surface); border-left: 3px solid var(--accent);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 1rem 1.3rem; margin: .8rem 0;
-}
-.decision h3 { margin-top: 0; }
-details {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); margin-bottom: .5rem;
-}
-summary {
-  padding: 1rem 1.2rem; cursor: pointer; list-style: none;
-  display: flex; justify-content: space-between; align-items: center;
-  font-weight: 500;
-}
-summary::before { content: '▸'; color: var(--muted); font-size: .85rem; margin-right: .6rem; flex-shrink: 0; }
-details[open] summary::before { content: '▾'; }
-.faq-answer { padding: 0 1.2rem 1rem 2.2rem; color: var(--muted); line-height: 1.6; }
-.copy-btn {
-  position: absolute; top: .5rem; right: .6rem;
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--muted); font-size: .7rem; padding: .15rem .5rem;
-  border-radius: 3px; cursor: pointer;
-}
-.back-link {
-  display: inline-block; margin: 2rem 0 1rem;
-  padding: .5rem 1rem; border: 1px solid var(--border);
-  border-radius: var(--radius); color: var(--muted); font-size: .9rem;
-}
-.back-link:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
-footer {
-  max-width: var(--max-w); margin: 3rem auto 0; padding-top: 1.5rem;
-  border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem;
-}
-@media (max-width: 600px) {
-  h1 { font-size: 1.5rem; }
-}
-</style>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
-<nav>
-  <a href="/" class="logo">npm<span>v12</span>guide</a>
-  <div>
-    <a href="/">Home</a> &nbsp;
-    <a href="/ci-cd/">CI/CD</a> &nbsp;
-    <a href="/native-modules/">Native Modules</a> &nbsp;
-    <a href="/monorepo/">Monorepo</a> &nbsp;
-    <a href="/rollback/">Rollback</a> &nbsp;
+<nav class="nav">
+  <a href="/" class="nav-logo">npm<span style="color:var(--accent);">v12</span>guide</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/ci-cd/">CI/CD</a>
+    <a href="/native-modules/">Native Modules</a>
+    <a href="/monorepo/">Monorepo</a>
+    <a href="/rollback/">Rollback</a>
     <a href="/vs-npm-11/">npm 11 vs 12</a>
   </div>
 </nav>
@@ -134,18 +44,17 @@ footer {
 
 <section class="hero">
   <h1>How to Stay on npm 11: Downgrade, Pin, and Rollback Strategies</h1>
-  <p style="font-size:1.1rem;color:var(--muted);max-width:640px;">
-    <strong style="color:var(--text);">Not ready for npm v12? That's fine.</strong>
+  <p style="font-size:1.1rem;color:var(--text-muted);max-width:640px;">
+    <strong>Not ready for npm v12? That's fine.</strong>
     Here's how to pin npm 11, override the Node.js bundled version, plan a team rollout when you <em>are</em> ready, and rollback cleanly if you already upgraded and things broke.
   </p>
 </section>
 
 <section>
 <h2>Pin npm 11 Globally</h2>
-
 <p>The simplest approach: pin the npm version globally so it survives Node.js upgrades.</p>
 
-<pre><span class="copy-btn">copy</span># Install npm 11 globally (overrides any Node.js-bundled npm)
+<pre># Install npm 11 globally (overrides any Node.js-bundled npm)
 npm install -g npm@11
 
 # Verify
@@ -157,20 +66,20 @@ npm config set save-exact true</pre>
 
 <div class="rollback">
   <h3>Engine Strict Enforcement</h3>
-  <p style="color:var(--muted);">Add to your project's <code>package.json</code> to enforce npm 11 at the project level. Anyone running npm 12 on this project will see an error:</p>
-<pre><span class="copy-btn">copy</span>{
+  <p style="color:var(--text-muted);">Add to your project's <code>package.json</code> to enforce npm 11 at the project level. Anyone running npm 12 on this project will see an error:</p>
+<pre style="background:transparent;border-color:#fecaca;">{
   "engines": {
     "npm": "<12"
   }
 }</pre>
-  <p style="color:var(--muted);">Then in <code>.npmrc</code>: <code>engine-strict=true</code> — this makes npm refuse to install if the npm version is wrong.</p>
+  <p style="color:var(--text-muted);">Then in <code>.npmrc</code>: <code>engine-strict=true</code> — this makes npm refuse to install if the npm version is wrong.</p>
 </div>
 </section>
 
 <section>
 <h2>.npmrc Configuration for Stability</h2>
 
-<pre><span class="copy-btn">copy</span># .npmrc — pin to npm 11 behavior
+<pre># .npmrc — pin to npm 11 behavior
 
 # Enforce engine requirements (blocks npm 12)
 engine-strict=true
@@ -185,21 +94,20 @@ lockfile-version=3
 
 <section>
 <h2>Node.js Bundled npm Override</h2>
-
 <p>When you install a new Node.js version, it bundles its own npm. These methods ensure your pinned npm 11 survives Node.js upgrades.</p>
 
 <div class="use-case">
   <h3>corepack (Node.js 16+)</h3>
-  <p style="color:var(--muted);">Corepack manages package manager versions. Enable it and pin npm:</p>
-<pre><span class="copy-btn">copy</span>corepack enable
+  <p style="color:var(--text-muted);">Corepack manages package manager versions. Enable it and pin npm:</p>
+<pre>corepack enable
 corepack prepare npm@11 --activate</pre>
-  <p style="color:var(--muted);">Now <code>npm</code> always resolves to the corepack-managed npm 11, even after <code>nvm install 24</code>.</p>
+  <p style="color:var(--text-muted);">Now <code>npm</code> always resolves to the corepack-managed npm 11, even after <code>nvm install 24</code>.</p>
 </div>
 
 <div class="use-case">
   <h3>nvm / nodenv / fnm — Post-Install Hook</h3>
-  <p style="color:var(--muted);">Add to your shell profile (<code>.bashrc</code>, <code>.zshrc</code>):</p>
-<pre><span class="copy-btn">copy</span># After nvm install, pin npm to 11
+  <p style="color:var(--text-muted);">Add to your shell profile (<code>.bashrc</code>, <code>.zshrc</code>):</p>
+<pre># After nvm install, pin npm to 11
 nvm_install_hook() {
   npm install -g npm@11 2>/dev/null
 }
@@ -210,8 +118,8 @@ alias fnm_install='fnm install $1 && npm install -g npm@11'</pre>
 
 <div class="use-case">
   <h3>Docker Override</h3>
-  <p style="color:var(--muted);">In your Dockerfile, override the bundled npm after FROM:</p>
-<pre><span class="copy-btn">copy</span>FROM node:22
+  <p style="color:var(--text-muted);">In your Dockerfile, override the bundled npm after FROM:</p>
+<pre>FROM node:22
 RUN npm install -g npm@11 && \
     npm --version  # verify: 11.x.x
 # rest of Dockerfile...</pre>
@@ -223,7 +131,7 @@ RUN npm install -g npm@11 && \
 
 <div class="rollback">
   <h3>Immediate Downgrade</h3>
-<pre><span class="copy-btn">copy</span># 1. Reinstall npm 11 globally
+<pre style="background:transparent;border-color:#fecaca;"># 1. Reinstall npm 11 globally
 npm install -g npm@11
 
 # 2. Verify
@@ -242,27 +150,26 @@ npm install
 
 <section>
 <h2>Team Rollout Strategy</h2>
-
 <p>Don't upgrade everyone at once. Here's the phased migration plan used by teams that made the jump cleanly:</p>
 
 <div class="use-case">
   <h3>Phase 1: Audit (Week 1)</h3>
-  <p style="color:var(--muted);">Upgrade dev environments to npm 11.16.0+. Run <code>npm install</code> in all projects. Review the deprecation warnings — they preview exactly what npm 12 will block. Create a spreadsheet: which native modules, which Git deps, which projects.</p>
+  <p style="color:var(--text-muted);">Upgrade dev environments to npm 11.16.0+. Run <code>npm install</code> in all projects. Review the deprecation warnings — they preview exactly what npm 12 will block. Create a spreadsheet: which native modules, which Git deps, which projects.</p>
 </div>
 
 <div class="use-case">
   <h3>Phase 2: Approve Scripts (Week 1-2)</h3>
-  <p style="color:var(--muted);">Still on npm 11. Run <code>npm approve-scripts &lt;pkg&gt;</code> for each trusted native dependency. Commit the allowlist to <code>package.json</code>. Builds still pass (npm 11 honors the allowlist). Zero risk, all preparation.</p>
+  <p style="color:var(--text-muted);">Still on npm 11. Run <code>npm approve-scripts &lt;pkg&gt;</code> for each trusted native dependency. Commit the allowlist to <code>package.json</code>. Builds still pass (npm 11 honors the allowlist). Zero risk, all preparation.</p>
 </div>
 
 <div class="use-case">
   <h3>Phase 3: Test CI with npm 12 Pre-Release (Week 2-3)</h3>
-  <p style="color:var(--muted);">Add a matrix dimension to CI: test with <code>npm: [11, 12]</code>. npm 12 builds are <em>informational only</em> — they don't block PRs. Fix everything that breaks on the npm 12 leg until it's clean.</p>
+  <p style="color:var(--text-muted);">Add a matrix dimension to CI: test with <code>npm: [11, 12]</code>. npm 12 builds are <em>informational only</em> — they don't block PRs. Fix everything that breaks on the npm 12 leg until it's clean.</p>
 </div>
 
 <div class="use-case">
   <h3>Phase 4: Full Migration (Week 3-4)</h3>
-  <p style="color:var(--muted);">Switch CI to npm 12 as the primary version. Announce to the team. Remove the npm 11 matrix leg. Pin npm 12 in Dockerfiles and dev setup scripts.</p>
+  <p style="color:var(--text-muted);">Switch CI to npm 12 as the primary version. Announce to the team. Remove the npm 11 matrix leg. Pin npm 12 in Dockerfiles and dev setup scripts.</p>
 </div>
 </section>
 
@@ -325,7 +232,7 @@ npm install
 </section>
 
 <section style="margin-top:3rem;text-align:center;">
-  <p style="color:var(--muted);">Related Guides:</p>
+  <p style="color:var(--text-muted);">Related Guides:</p>
   <a href="/vs-npm-11/" class="back-link" style="margin:.3rem;">npm 11 vs 12</a>
   <a href="/monorepo/" class="back-link" style="margin:.3rem;">Monorepo Guide</a>
   <a href="/ci-cd/" class="back-link" style="margin:.3rem;">CI/CD Pipeline</a>
@@ -334,7 +241,7 @@ npm install
 
 </main>
 
-<footer>
+<footer class="footer">
   <p><a href="/">installsafe.dev</a> — npm v12 breaking changes migration guide. Rollback, monorepo, CI/CD, native modules.</p>
   <p style="margin-top:.5rem;">
     <a href="/privacy/">Privacy</a> &middot;
@@ -367,7 +274,6 @@ npm install
   "sameAs": ["https://github.com/npm/cli"]
 }
 </script>
-
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

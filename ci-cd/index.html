@@ -12,120 +12,30 @@
 <meta property="og:site_name" content="npm v12 Guide">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="npm v12 CI/CD Pipeline Setup">
-  <meta property="og:image" content="https://installsafe.dev/assets/og-image.svg">
-  <meta name="twitter:image" content="https://installsafe.dev/assets/og-image.svg">
-  <meta name="twitter:description" content="npm v12 will break your CI. Scripts off, Git deps blocked, native modules fail. Set up your pipeline now.">
+<meta property="og:image" content="https://installsafe.dev/assets/og-image.svg">
+<meta name="twitter:image" content="https://installsafe.dev/assets/og-image.svg">
+<meta name="twitter:description" content="npm v12 will break your CI. Scripts off, Git deps blocked, native modules fail. Set up your pipeline now.">
 <link rel="canonical" href="https://installsafe.dev/ci-cd/">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
-<style>
-:root {
-  --bg: #0d1117; --surface: #161b22; --border: #30363d;
-  --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
-  --danger: #f85149; --warn: #d2991d; --ok: #3fb950;
-  --code-bg: #1c2128; --radius: 6px; --max-w: 820px;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  background: var(--bg); color: var(--text); line-height: 1.65;
-  padding: 0 1rem 3rem;
-}
-nav {
-  max-width: var(--max-w); margin: 0 auto; padding: 1.2rem 0;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: .5rem;
-}
-nav a { color: var(--muted); text-decoration: none; font-size: .9rem; }
-nav a:hover { color: var(--accent); }
-.logo { font-weight: 600; color: var(--text); font-size: 1rem; }
-.logo span { color: var(--accent); }
-main { max-width: var(--max-w); margin: 0 auto; }
-.hero { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
-h1 { font-size: 2rem; line-height: 1.3; margin-bottom: .6rem; }
-h2 { font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); }
-h3 { font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
-p { margin-bottom: 1rem; }
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
-pre {
-  background: var(--code-bg); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1rem 1.2rem;
-  overflow-x: auto; font-size: .88rem; line-height: 1.55;
-  margin: .8rem 0 1.2rem; position: relative;
-}
-:not(pre) > code {
-  background: var(--code-bg); padding: .12rem .35rem;
-  border-radius: 3px; font-size: .85rem; border: 1px solid var(--border);
-}
-.breaking-change {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1.2rem 1.4rem; margin: 1rem 0;
-}
-.breaking-change h3 { margin-top: 0; }
-.use-case {
-  background: var(--surface); border-left: 3px solid var(--accent);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 1rem 1.3rem; margin: .8rem 0;
-}
-.use-case h3 { margin-top: 0; }
-.priority-tag {
-  display: inline-block; padding: .15rem .5rem; border-radius: 3px;
-  font-size: .75rem; font-weight: 600; margin-right: .4rem; vertical-align: middle;
-}
-.tag-p0 { color: var(--danger); background: rgba(248,81,73,.12); }
-.tag-p1 { color: var(--warn); background: rgba(210,153,29,.12); }
-details {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); margin-bottom: .5rem;
-}
-summary {
-  padding: 1rem 1.2rem; cursor: pointer; list-style: none;
-  display: flex; justify-content: space-between; align-items: center;
-  font-weight: 500;
-}
-summary::before { content: '▸'; color: var(--muted); font-size: .85rem; margin-right: .6rem; flex-shrink: 0; }
-details[open] summary::before { content: '▾'; }
-.faq-answer { padding: 0 1.2rem 1rem 2.2rem; color: var(--muted); line-height: 1.6; }
-.copy-btn {
-  position: absolute; top: .5rem; right: .6rem;
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--muted); font-size: .7rem; padding: .15rem .5rem;
-  border-radius: 3px; cursor: pointer;
-}
-.back-link {
-  display: inline-block; margin: 2rem 0 1rem;
-  padding: .5rem 1rem; border: 1px solid var(--border);
-  border-radius: var(--radius); color: var(--muted); font-size: .9rem;
-}
-.back-link:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
-footer {
-  max-width: var(--max-w); margin: 3rem auto 0; padding-top: 1.5rem;
-  border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem;
-}
-@media (max-width: 600px) {
-  h1 { font-size: 1.5rem; }
-}
-</style>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
-<nav>
-  <a href="/" class="logo">npm<span>v12</span>guide</a>
-  <div>
-    <a href="/">Home</a> &nbsp;
-    <a href="/ci-cd/">CI/CD</a> &nbsp;
-    <a href="/native-modules/">Native Modules</a> &nbsp;
-    <a href="/monorepo/">Monorepo</a> &nbsp;
-    <a href="/rollback/">Rollback</a> &nbsp;
+<nav class="nav">
+  <a href="/" class="nav-logo">npm<span style="color:var(--accent);">v12</span>guide</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/ci-cd/">CI/CD</a>
+    <a href="/native-modules/">Native Modules</a>
+    <a href="/monorepo/">Monorepo</a>
+    <a href="/rollback/">Rollback</a>
     <a href="/vs-npm-11/">npm 11 vs 12</a>
   </div>
 </nav>
@@ -134,40 +44,38 @@ footer {
 
 <section class="hero">
   <h1>npm v12 CI/CD Pipeline Setup: GitHub Actions, Docker, GitLab CI</h1>
-  <p style="font-size:1.1rem;color:var(--muted);max-width:640px;">
-    <strong style="color:var(--text);">npm v12 will break your CI. Not "might" — will.</strong>
+  <p style="font-size:1.1rem;color:var(--text-muted);max-width:640px;">
+    <strong>npm v12 will break your CI. Not "might" — will.</strong>
     Scripts are off, Git deps are blocked, native modules won't compile, and <code>npm ci</code> can return exit code 0 while silently skipping critical builds. Set up your pipeline now so you don't fail when Node.js bundles v12.
   </p>
 </section>
 
 <section>
 <h2>Why CI Breaks on npm v12</h2>
-
 <p>npm v12 flips three defaults that silently kill CI pipelines:</p>
 
 <div class="breaking-change">
   <h3><span class="priority-tag tag-p0">P0</span> Scripts Are Off by Default</h3>
-  <p style="color:var(--muted);">Any dependency with a <code>postinstall</code>, <code>preinstall</code>, or native build script will silently skip. The worst part: <strong><code>npm ci</code> exits with code 0</strong>. Your tests pass, your deploy goes out — but native modules were never compiled, and the app crashes in production with <code>Cannot find module X.node</code>.</p>
+  <p style="color:var(--text-muted);">Any dependency with a <code>postinstall</code>, <code>preinstall</code>, or native build script will silently skip. The worst part: <strong><code>npm ci</code> exits with code 0</strong>. Your tests pass, your deploy goes out — but native modules were never compiled, and the app crashes in production with <code>Cannot find module X.node</code>.</p>
 </div>
 
 <div class="breaking-change">
   <h3><span class="priority-tag tag-p1">P1</span> Git Dependencies Blocked</h3>
-  <p style="color:var(--muted);">Any <code>git+https://</code> reference in <code>package.json</code> or <code>package-lock.json</code> causes install to fail. Your monorepo's internal Git references, your fork of a hotfix, your private repo dep — all blocked. This is especially dangerous in CI because <em>transitive</em> Git deps (from packages you don't control) also kill the build.</p>
+  <p style="color:var(--text-muted);">Any <code>git+https://</code> reference in <code>package.json</code> or <code>package-lock.json</code> causes install to fail. Your monorepo's internal Git references, your fork of a hotfix, your private repo dep — all blocked. This is especially dangerous in CI because <em>transitive</em> Git deps (from packages you don't control) also kill the build.</p>
 </div>
 
 <div class="breaking-change">
   <h3><span class="priority-tag tag-p1">P1</span> C++17 Required for Native Modules</h3>
-  <p style="color:var(--muted);">Your CI's Docker image or runner with gcc 7/C++11 won't compile native addons anymore. <code>node-gyp rebuild</code> fails with compiler errors if the toolchain is pre-C++17.</p>
+  <p style="color:var(--text-muted);">Your CI's Docker image or runner with gcc 7/C++11 won't compile native addons anymore. <code>node-gyp rebuild</code> fails with compiler errors if the toolchain is pre-C++17.</p>
 </div>
 </section>
 
 <section>
 <h2>GitHub Actions: Production-Ready Workflow</h2>
-
 <p>Here's a complete workflow that handles npm v12's changes — script approval, caching, and smoke tests to catch silent failures.</p>
 
 <h3>Step 1: Full CI Workflow with npm v12</h3>
-<pre><span class="copy-btn">copy</span>name: CI — npm v12 Compatible
+<pre>name: CI — npm v12 Compatible
 
 on: [push, pull_request]
 
@@ -214,7 +122,7 @@ jobs:
 
 <h3>Step 2: Smoke Test After Install</h3>
 <p>The most dangerous npm v12 scenario: <code>npm ci</code> succeeds but native modules are missing. Add this smoke test <strong>after every install</strong>:</p>
-<pre><span class="copy-btn">copy</span># Check that every package in package.json with native bindings actually compiled
+<pre># Check that every package in package.json with native bindings actually compiled
 node -e "
 const pkgs = ['sharp', 'esbuild', 'bcrypt', 'node-gyp'];
 for (const p of pkgs) {
@@ -226,7 +134,7 @@ console.log('All native modules present');
 
 <h3>Step 3: Matrix Testing Across npm Versions</h3>
 <p>Test <strong>both</strong> npm 11 (current) and npm 12 (future) in your matrix. Catch regressions before the Node.js upgrade forces them:</p>
-<pre><span class="copy-btn">copy</span>strategy:
+<pre>strategy:
   matrix:
     node: [18, 20, 22]
     npm: [11, 12]
@@ -243,11 +151,10 @@ steps:
 
 <section>
 <h2>Dockerfile for npm v12</h2>
-
 <p>Your Docker builds need explicit approval of native modules <em>and</em> the C++17 toolchain.</p>
 
 <h3>Production Dockerfile</h3>
-<pre><span class="copy-btn">copy</span>FROM node:22-slim
+<pre>FROM node:22-slim
 
 # npm v12 needs C++17 for native modules
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -276,7 +183,7 @@ CMD ["node", "index.js"]</pre>
 
 <h3>Multi-Stage Build: Generate Allowlist</h3>
 <p>For teams that want zero manual approvals, generate the allowlist in a builder stage:</p>
-<pre><span class="copy-btn">copy</span># Stage 1: Generate allowlist
+<pre># Stage 1: Generate allowlist
 FROM node:22-slim AS allowlist-gen
 RUN npm install -g npm@12
 WORKDIR /app
@@ -301,7 +208,7 @@ CMD ["node", "index.js"]</pre>
 <section>
 <h2>GitLab CI Configuration</h2>
 
-<pre><span class="copy-btn">copy</span># .gitlab-ci.yml — npm v12 Compatible
+<pre># .gitlab-ci.yml — npm v12 Compatible
 image: node:22
 
 variables:
@@ -341,27 +248,27 @@ check-git-deps:
 
 <div class="breaking-change">
   <h3><span class="priority-tag tag-p0">P0</span> npm ci passes but app crashes: "Cannot find module X.node"</h3>
-  <p style="color:var(--muted);">npm v12 skipped native module compilation with exit code 0. Fix: run <code>npm approve-scripts &lt;pkg&gt;</code> for each native dependency <em>before</em> the test step. Add the smoke test above that verifies all native modules loaded.</p>
+  <p style="color:var(--text-muted);">npm v12 skipped native module compilation with exit code 0. Fix: run <code>npm approve-scripts &lt;pkg&gt;</code> for each native dependency <em>before</em> the test step. Add the smoke test above that verifies all native modules loaded.</p>
 </div>
 
 <div class="breaking-change">
   <h3><span class="priority-tag tag-p1">P1</span> "Git dep not allowed" in CI</h3>
-  <p style="color:var(--muted);">A transitive dependency in <code>package-lock.json</code> references <code>git+https://</code>. Fix: either add <code>allow-git=true</code> to <code>.npmrc</code> (quick), or migrate the dep to a registry-hosted version (permanent). <strong>Audit:</strong> <code>grep -r 'git+https://' package-lock.json</code> to find all offenders.</p>
+  <p style="color:var(--text-muted);">A transitive dependency in <code>package-lock.json</code> references <code>git+https://</code>. Fix: either add <code>allow-git=true</code> to <code>.npmrc</code> (quick), or migrate the dep to a registry-hosted version (permanent). <strong>Audit:</strong> <code>grep -r 'git+https://' package-lock.json</code> to find all offenders.</p>
 </div>
 
 <div class="breaking-change">
   <h3><span class="priority-tag tag-p1">P1</span> node-gyp rebuild failed: C++17 compiler required</h3>
-  <p style="color:var(--muted);">Your CI image has gcc 7 or clang 6. npm v12 native modules need C++17. Fix: on Ubuntu, <code>apt-get install gcc-8 g++-8</code> or use a newer base image (<code>ubuntu-22.04</code> or later). On Alpine, install <code>gcc g++</code> from edge repo.</p>
+  <p style="color:var(--text-muted);">Your CI image has gcc 7 or clang 6. npm v12 native modules need C++17. Fix: on Ubuntu, <code>apt-get install gcc-8 g++-8</code> or use a newer base image (<code>ubuntu-22.04</code> or later). On Alpine, install <code>gcc g++</code> from edge repo.</p>
 </div>
 
 <div class="breaking-change">
   <h3><span class="priority-tag tag-p1">P1</span> shrinkwrap.json silently ignored in CI</h3>
-  <p style="color:var(--muted);">If your CI uses <code>npm-shrinkwrap.json</code>, npm v12 ignores it and falls back to <code>package-lock.json</code> — producing a different dependency tree than expected. Fix: rename <code>npm-shrinkwrap.json</code> → <code>package-lock.json</code>, or switch to <code>bundleDependencies</code> if you're publishing packages.</p>
+  <p style="color:var(--text-muted);">If your CI uses <code>npm-shrinkwrap.json</code>, npm v12 ignores it and falls back to <code>package-lock.json</code> — producing a different dependency tree than expected. Fix: rename <code>npm-shrinkwrap.json</code> → <code>package-lock.json</code>, or switch to <code>bundleDependencies</code> if you're publishing packages.</p>
 </div>
 
 <div class="breaking-change">
   <h3><span class="priority-tag tag-p1">P1</span> npm view --json output changed: CI scripts break</h3>
-  <p style="color:var(--muted);">Scripts that parse <code>npm view pkg version --json</code> now get an array instead of a single object. Fix: update JSON parsing — access <code>[0]</code> or use <code>jq '.[0]'</code> for single-version queries.</p>
+  <p style="color:var(--text-muted);">Scripts that parse <code>npm view pkg version --json</code> now get an array instead of a single object. Fix: update JSON parsing — access <code>[0]</code> or use <code>jq '.[0]'</code> for single-version queries.</p>
 </div>
 </section>
 
@@ -395,7 +302,7 @@ check-git-deps:
 </section>
 
 <section style="margin-top:3rem;text-align:center;">
-  <p style="color:var(--muted);">Related Guides:</p>
+  <p style="color:var(--text-muted);">Related Guides:</p>
   <a href="/native-modules/" class="back-link" style="margin:.3rem;">Native Module Fixes</a>
   <a href="/rollback/" class="back-link" style="margin:.3rem;">Rollback Strategies</a>
   <a href="/monorepo/" class="back-link" style="margin:.3rem;">Monorepo Guide</a>
@@ -404,7 +311,7 @@ check-git-deps:
 
 </main>
 
-<footer>
+<footer class="footer">
   <p><a href="/">installsafe.dev</a> — npm v12 breaking changes migration guide. CI/CD, native modules, monorepo, rollback.</p>
   <p style="margin-top:.5rem;">
     <a href="/privacy/">Privacy</a> &middot;
@@ -437,7 +344,6 @@ check-git-deps:
   "sameAs": ["https://github.com/npm/cli"]
 }
 </script>
-
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

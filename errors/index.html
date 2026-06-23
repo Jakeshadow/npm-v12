@@ -12,109 +12,29 @@
 <meta property="og:site_name" content="npm v12 Guide">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="npm v12 Errors: Fix "allowScripts disabled" & 12 Common Breakages">
-  <meta property="og:image" content="https://installsafe.dev/assets/og-image.svg">
-  <meta name="twitter:image" content="https://installsafe.dev/assets/og-image.svg">
-  <meta name="twitter:description" content="Every npm v12 error with the exact fix. Copy-paste ready.">
+<meta property="og:image" content="https://installsafe.dev/assets/og-image.svg">
+<meta name="twitter:image" content="https://installsafe.dev/assets/og-image.svg">
+<meta name="twitter:description" content="Every npm v12 error with the exact fix. Copy-paste ready.">
 <link rel="canonical" href="https://installsafe.dev/errors/">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
-<style>
-:root {
-  --bg: #0d1117; --surface: #161b22; --border: #30363d;
-  --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
-  --danger: #f85149; --warn: #d2991d; --ok: #3fb950;
-  --code-bg: #1c2128; --radius: 6px; --max-w: 820px;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  background: var(--bg); color: var(--text); line-height: 1.65;
-  padding: 0 1rem 3rem;
-}
-nav {
-  max-width: var(--max-w); margin: 0 auto; padding: 1.2rem 0;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: .5rem;
-}
-nav a { color: var(--muted); text-decoration: none; font-size: .9rem; }
-nav a:hover { color: var(--accent); }
-.logo { font-weight: 600; color: var(--text); font-size: 1rem; }
-.logo span { color: var(--accent); }
-main { max-width: var(--max-w); margin: 0 auto; }
-.hero { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
-h1 { font-size: 2rem; line-height: 1.3; margin-bottom: .6rem; }
-h2 { font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); }
-h3 { font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
-p { margin-bottom: 1rem; }
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
-pre {
-  background: var(--code-bg); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1rem 1.2rem;
-  overflow-x: auto; font-size: .88rem; line-height: 1.55;
-  margin: .8rem 0 1.2rem; position: relative;
-}
-:not(pre) > code {
-  background: var(--code-bg); padding: .12rem .35rem;
-  border-radius: 3px; font-size: .85rem; border: 1px solid var(--border);
-}
-.callout {
-  background: var(--surface); border-left: 3px solid var(--accent);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 1rem 1.3rem; margin: 1rem 0;
-}
-.callout.warn { border-left-color: var(--warn); }
-.callout.ok { border-left-color: var(--ok); }
-.callout.danger { border-left-color: var(--danger); }
-.error-block {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); margin: 1.2rem 0;
-  overflow: hidden;
-}
-.error-msg {
-  background: rgba(248,81,73,.08); border-bottom: 1px solid var(--border);
-  padding: .8rem 1.2rem; font-family: 'Roboto Mono', monospace;
-  font-size: .85rem; color: var(--danger);
-}
-.error-body { padding: 1rem 1.2rem; }
-.error-body h4 { font-size: .95rem; margin-bottom: .4rem; }
-.error-body p { color: var(--muted); font-size: .9rem; margin-bottom: .6rem; }
-.error-body pre { margin: .6rem 0 0; }
-details {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: .8rem 1rem; margin: .5rem 0;
-}
-details summary { cursor: pointer; font-weight: 500; }
-.faq-answer { padding-top: .6rem; color: var(--muted); font-size: .93rem; }
-footer {
-  max-width: var(--max-w); margin: 3rem auto 0;
-  padding-top: 1.5rem; border-top: 1px solid var(--border);
-  color: var(--muted); font-size: .85rem; text-align: center;
-}
-nav .current { color: var(--text); font-weight: 500; }
-@media (max-width: 600px) {
-  h1 { font-size: 1.5rem; }
-  pre { font-size: .8rem; padding: .8rem; }
-}
-</style>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
-<nav>
-  <a href="/" class="logo">npm v12 <span>Guide</span></a>
-  <div>
+<nav class="nav">
+  <a href="/" class="nav-logo">npm<span style="color:var(--accent);">v12</span>guide</a>
+  <div class="nav-links">
     <a href="/">Changes</a>
-    <a href="/vs-npm-11/" style="margin-left:1rem;">vs v11</a>
-    <a href="/performance/" style="margin-left:1rem;">Performance</a>
-    <a href="/errors/" style="margin-left:1rem;" class="current">Errors</a>
+    <a href="/vs-npm-11/">vs v11</a>
+    <a href="/performance/">Performance</a>
+    <a href="/errors/" class="current">Errors</a>
   </div>
 </nav>
 
@@ -122,10 +42,9 @@ nav .current { color: var(--text); font-weight: 500; }
 
 <section class="hero">
   <h1>npm v12 broke your <code style="font-size:1.2rem;">npm install</code>. Here's the fix.</h1>
-  <p style="color:var(--muted);font-size:1.1rem;line-height:1.6;">Every error message you'll hit upgrading to v12 — with the exact command or config to fix it. <strong style="color:var(--text);">Copy, paste, move on.</strong></p>
+  <p style="color:var(--text-muted);font-size:1.1rem;line-height:1.6;">Every error message you'll hit upgrading to v12 — with the exact command or config to fix it. <strong>Copy, paste, move on.</strong></p>
 </section>
 
-<!-- Quick Reference -->
 <section>
 <h2>Quick Reference: The 3 Config Lines That Fix 80% of Errors</h2>
 <p>Most v12 errors come from three new defaults. If you just want your CI green <em>now</em> and plan to audit later:</p>
@@ -140,11 +59,9 @@ allow-remote-deps=true</code></pre>
 </div>
 </section>
 
-<!-- Error Catalog -->
 <section>
 <h2>Error Catalog</h2>
 
-<!-- Error 1 -->
 <div class="error-block">
   <div class="error-msg">npm error Cannot run scripts for &lt;package&gt; — allowScripts is disabled</div>
   <div class="error-body">
@@ -165,7 +82,6 @@ allow-scripts=true</code></pre>
   </div>
 </div>
 
-<!-- Error 2 -->
 <div class="error-block">
   <div class="error-msg">npm error Git dependencies are not allowed: git://github.com/user/repo.git</div>
   <div class="error-body">
@@ -176,11 +92,10 @@ allow-scripts=true</code></pre>
     <h4>Fix (permanent config for private repos)</h4>
     <pre><code># .npmrc
 allow-git-deps=true</code></pre>
-    <p style="color:var(--muted);font-size:.85rem;">Better: migrate private packages to a registry (GitHub Packages, Verdaccio, or npm private registry). Git deps skip integrity verification.</p>
+    <p style="color:var(--text-muted);font-size:.85rem;">Better: migrate private packages to a registry (GitHub Packages, Verdaccio, or npm private registry). Git deps skip integrity verification.</p>
   </div>
 </div>
 
-<!-- Error 3 -->
 <div class="error-block">
   <div class="error-msg">npm error Remote URL dependencies are not allowed: https://example.com/package.tgz</div>
   <div class="error-body">
@@ -191,11 +106,10 @@ allow-git-deps=true</code></pre>
     <h4>Fix (permanent)</h4>
     <pre><code># .npmrc
 allow-remote-deps=true</code></pre>
-    <p style="color:var(--muted);font-size:.85rem;">Better: publish the package to a registry or use a local file dependency with an integrity hash.</p>
+    <p style="color:var(--text-muted);font-size:.85rem;">Better: publish the package to a registry or use a local file dependency with an integrity hash.</p>
   </div>
 </div>
 
-<!-- Error 4 -->
 <div class="error-block">
   <div class="error-msg">npm error npm-shrinkwrap.json is no longer supported</div>
   <div class="error-body">
@@ -205,11 +119,10 @@ allow-remote-deps=true</code></pre>
     <pre><code># Convert shrinkwrap to package-lock.json
 rm npm-shrinkwrap.json
 npm install --package-lock-only</code></pre>
-    <p style="color:var(--muted);font-size:.85rem;">The generated <code>package-lock.json</code> uses lockfile v3, which is backward-compatible with npm v10/v11.</p>
+    <p style="color:var(--text-muted);font-size:.85rem;">The generated <code>package-lock.json</code> uses lockfile v3, which is backward-compatible with npm v10/v11.</p>
   </div>
 </div>
 
-<!-- Error 5 -->
 <div class="error-block">
   <div class="error-msg">npm error code EACCES — errno -4094 — syscall mkdir</div>
   <div class="error-body">
@@ -224,7 +137,6 @@ sudo chown -R $(whoami) ~/.npm</code></pre>
   </div>
 </div>
 
-<!-- Error 6 -->
 <div class="error-block">
   <div class="error-msg">npm error code EINTEGRITY — sha512 integrity check failed</div>
   <div class="error-body">
@@ -234,11 +146,10 @@ sudo chown -R $(whoami) ~/.npm</code></pre>
     <pre><code># Clear the corrupt entry and re-fetch
 npm cache clean --force
 npm install</code></pre>
-    <p style="color:var(--muted);font-size:.85rem;">If the error persists after cache clean, the registry may have republished the package with different content — check the package's npm page for a recent publish.</p>
+    <p style="color:var(--text-muted);font-size:.85rem;">If the error persists after cache clean, the registry may have republished the package with different content — check the package's npm page for a recent publish.</p>
   </div>
 </div>
 
-<!-- Error 7 -->
 <div class="error-block">
   <div class="error-msg">npm error Cannot find module — native addon not built for Node.js v22</div>
   <div class="error-body">
@@ -256,7 +167,6 @@ npm install bcrypt --build-from-source</code></pre>
   </div>
 </div>
 
-<!-- Error 8 -->
 <div class="error-block">
   <div class="error-msg">npm error code ERESOLVE — unable to resolve dependency tree</div>
   <div class="error-body">
@@ -279,7 +189,6 @@ npm install package@version --save-exact
   </div>
 </div>
 
-<!-- Error 9 -->
 <div class="error-block">
   <div class="error-msg">npm error Cannot read properties of null (reading 'package')</div>
   <div class="error-body">
@@ -292,7 +201,6 @@ npm install</code></pre>
   </div>
 </div>
 
-<!-- Error 10 -->
 <div class="error-block">
   <div class="error-msg">npm error Workspace not found: packages/&lt;name&gt;</div>
   <div class="error-body">
@@ -310,7 +218,6 @@ npm ls --workspaces --depth=0
 </div>
 </section>
 
-<!-- CI-Specific -->
 <section>
 <h2>CI/CD: Errors You'll Only See in Pipelines</h2>
 
@@ -344,13 +251,12 @@ npm config set cache "$GITHUB_WORKSPACE/.npm"  # GitHub Actions</code></pre>
 </div>
 </section>
 
-<!-- Prevention -->
 <section>
 <h2>Prevent Errors Before They Happen</h2>
 
 <div class="callout ok">
   <h3>The v12-Ready .npmrc Template</h3>
-  <p style="color:var(--muted);">Drop this in your project root. It makes v12 behavior explicit — no surprises when Node.js LTS bundles v12.</p>
+  <p style="color:var(--text-muted);">Drop this in your project root. It makes v12 behavior explicit — no surprises when Node.js LTS bundles v12.</p>
   <pre><code># v12-ready .npmrc
 # Explicitly declare what your project needs
 
@@ -372,7 +278,6 @@ fund=false</code></pre>
 </div>
 </section>
 
-<!-- FAQ -->
 <section>
 <h2>FAQ</h2>
 
@@ -403,16 +308,16 @@ fund=false</code></pre>
 </section>
 
 <section style="margin-top:3rem;text-align:center;">
-  <p style="color:var(--muted);">Related Guides:</p>
-  <a href="/performance/" style="margin:.3rem;">Performance Guide</a>
-  <a href="/ci-cd/" style="margin:.3rem;">CI/CD Pipeline</a>
-  <a href="/vs-npm-11/" style="margin:.3rem;">v11 vs v12</a>
-  <a href="/" style="margin:.3rem;">← Migration Guide</a>
+  <p style="color:var(--text-muted);">Related Guides:</p>
+  <a href="/performance/" class="back-link" style="margin:.3rem;">Performance Guide</a>
+  <a href="/ci-cd/" class="back-link" style="margin:.3rem;">CI/CD Pipeline</a>
+  <a href="/vs-npm-11/" class="back-link" style="margin:.3rem;">v11 vs v12</a>
+  <a href="/" class="back-link" style="margin:.3rem;">← Migration Guide</a>
 </section>
 
 </main>
 
-<footer>
+<footer class="footer">
   <p><a href="/">installsafe.dev</a> — npm v12 migration and performance guide. Independent community resource.</p>
   <p style="margin-top:.5rem;">
     <a href="/privacy/">Privacy</a> &middot;
