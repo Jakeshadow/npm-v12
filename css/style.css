@@ -140,6 +140,7 @@ pre code { font-family: 'Roboto Mono', 'Fira Code', monospace; font-size: .88rem
   border-radius: var(--radius); padding: 1rem 1.3rem; margin: 1.5rem 0 0;
 }
 .rollback strong { color: var(--danger); }
+.rollback pre code { color: var(--text); }
 
 /* === Other Changes === */
 .other-changes {
