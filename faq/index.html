@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>npm v12 FAQ — 21 Questions Answered: Scripts, Git Deps, CI/CD, Rollback</title>
+<meta name="description" content="npm v12 FAQ: When does it release? Will it break my CI? Can I stay on v11? How do I fix node-gyp, native modules, postinstall scripts, shrinkwrap? All 21 answers.">
+<meta property="og:title" content="npm v12 FAQ — 21 Questions Answered">
+<meta property="og:description" content="When does npm v12 release? Will it break CI? Can I stay on v11? How do I fix node-gyp, native modules, shrinkwrap? All 21 answers.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://installsafe.dev/faq/">
+<meta property="og:site_name" content="npm v12 Guide">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="npm v12 FAQ — 21 Questions Answered">
+<meta property="og:image" content="https://installsafe.dev/assets/og-image.svg">
+<meta name="twitter:image" content="https://installsafe.dev/assets/og-image.svg">
+<meta name="twitter:description" content="When does npm v12 release? Will it break CI? Can I stay on v11? All 21 answers.">
+<link rel="canonical" href="https://installsafe.dev/faq/">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">npm<span style="color:var(--accent);">v12</span>guide</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/ci-cd/">CI/CD</a>
+    <a href="/native-modules/">Native Modules</a>
+    <a href="/monorepo/">Monorepo</a>
+    <a href="/rollback/">Rollback</a>
+    <a href="/vs-npm-11/">npm 11 vs 12</a>
+    <a href="/faq/">FAQ</a>
+  </div>
+</nav>
+
+<main>
+
+<section class="hero">
+  <h1>npm v12 FAQ — 21 Questions Answered</h1>
+  <p style="font-size:1.1rem;color:var(--text-muted);max-width:640px;">
+    Scripts blocked, Git deps failing, CI breaking, <code>node-gyp rebuild</code> errors, shrinkwrap gone.
+    Every question developers are asking about npm v12, with copy-paste fixes.
+  </p>
+</section>
+
+<section>
+<h2>When exactly does npm v12 release, and when will it hit my Node.js?</h2>
+<p>npm v12 is estimated July 2026. No confirmed date for Node.js bundling. Current LTS lines (22, 24, 26) ship npm 11.x. Historically, new npm majors take 2–4 Node releases to land. But you should prepare now — v11.16.0 already shows warnings.</p>
+
+<h2>Will --allow-scripts give me the old behavior back?</h2>
+<p>Yes. Adding <code>allow-scripts=all</code> to <code>.npmrc</code> restores the pre-v12 behavior. But the point is to move to an explicit allowlist approach. <code>npm approve-scripts</code> per package is the intended workflow — it's more secure and transparent.</p>
+
+<h2>I have 200 dependencies. Do I need to manually approve every script?</h2>
+<p>No. Most packages don't have lifecycle scripts. Run <code>npm approve-scripts --allow-scripts-pending</code> to see the actual list — likely 3–8 packages. Approve the ones you trust (sharp, esbuild, node-gyp itself) and deny the rest.</p>
+
+<h2>What about Yarn and pnpm? Do they have the same issues?</h2>
+<p>pnpm already supports per-package script allowlisting (via <code>pnpm.onlyBuiltDependencies</code>). Yarn 4+ has similar supply-chain protections. Both have had these controls for longer than npm. If you're already on pnpm/Yarn, you may not feel this pain at all.</p>
+
+<h2>Is npm v12 backward compatible?</h2>
+<p>No. npm v12 is a major version with intentional breaking changes. Scripts disabled by default, Git deps blocked, remote URLs blocked, <code>npm-shrinkwrap.json</code> removed, and <code>npm view --json</code> returning arrays instead of objects. Projects that worked with npm 11 may fail to install, build, or deploy under v12 without configuration changes. The migration checklist on the <a href="/">home page</a> covers all known breaking changes.</p>
+
+<h2>Can I keep using npm 11? How long is it supported?</h2>
+<p>Yes, for now. <code>npm install -g npm@11</code> keeps you on v11. But this is temporary — once Node.js LTS (22, 24, 26) bundles npm v12, staying on v11 means manually pinning npm in every environment (CI, Docker, dev machines). npm 11 will receive security patches for a limited time after v12 ships, but npm doesn't publish an LTS calendar. <strong>Plan to migrate within 1-2 months of the Node.js bundle, not the npm v12 release date.</strong></p>
+
+<h2>What if my CI/CD pipeline breaks after upgrading to npm v12?</h2>
+<p>Three most common failures: (1) Native modules won't compile because scripts are blocked — run <code>npm approve-scripts</code> and commit the allowlist. (2) Git dependencies won't resolve — add <code>--allow-git</code> or migrate to registry versions. (3) <code>npm ci</code> exits cleanly but <code>node_modules</code> is missing compiled binaries — add a smoke test after install. <strong>Critical:</strong> don't rely on exit codes alone. npm v12's <code>npm ci</code> can pass while your app is broken. See the <a href="/ci-cd/">CI/CD guide</a> for full pipeline fixes.</p>
+
+<h2>The allow-remote flag was blocking registry tarballs — is that fixed?</h2>
+<p>Yes. GitHub Issue #9347 tracked a bug where <code>allow-remote=none</code> blocked even standard npm registry downloads. Fixed in npm 11.15.0+. The flag correctly only blocks non-registry URLs now.</p>
+
+<h2>What if I still need npm-shrinkwrap.json for my published CLI tool?</h2>
+<p>Switch to <code>bundleDependencies</code>. Add <code>"bundleDependencies": ["dep-a", "dep-b"]</code> to <code>package.json</code>. When published, those deps are bundled in the tarball and installed from the local copy. Different semantics from shrinkwrap but solves the same problem.</p>
+
+<h2>How do I check if my project has hidden Git or remote deps from transitive dependencies?</h2>
+<p>Run <code>npm ls --all | grep -E "(git\+|https://.*\.tgz)"</code> while on npm 11.16.0+. Warnings will flag any transitive Git or remote deps. You can also audit your lockfile: <code>grep -r "git+" package-lock.json</code>.</p>
+
+<h2>Why does npm install fail with "node-gyp rebuild failed" after upgrading to npm v12?</h2>
+<p>npm v12 disables all lifecycle scripts by default — including the implicit <code>node-gyp rebuild</code> that compiles native addons. When a package has a <code>binding.gyp</code> file, npm used to auto-run node-gyp. Now it's blocked. Fix: run <code>npm approve-scripts --allow-scripts-pending</code> to see which packages need native compilation, then <code>npm approve-scripts &lt;package-name&gt;</code> for each one you trust (e.g., bcrypt, sharp, node-gyp itself). Or add <code>--allow-scripts</code> as a quick workaround during migration.</p>
+
+<h2>Why do I get "cannot find module X.node" after npm install in v12?</h2>
+<p>This error means a native addon failed to compile because its install script was blocked. The <code>.node</code> binary is produced by <code>node-gyp rebuild</code> which no longer runs by default. Check <code>npm approve-scripts --allow-scripts-pending</code> — the package with the missing <code>.node</code> file (e.g., <code>node-sass</code>, <code>bcrypt</code>) needs script approval. Once approved, re-run <code>npm install</code> and the native binary will be built.</p>
+
+<h2>Why is my postinstall script blocked in npm v12?</h2>
+<p>npm v12 flips the default: <strong>all</strong> lifecycle scripts (preinstall, install, postinstall) are blocked by default. This is the intended security behavior — npm won't run arbitrary code from dependencies without your explicit approval. To approve specific packages, use <code>npm approve-scripts &lt;name&gt;</code>. The approved list is stored in your <code>package.json</code> under <code>"scripts"</code>. Commit this file so your team and CI share the same allowlist.</p>
+
+<h2>Why is --allow-scripts not working in npm v12?</h2>
+<p>If <code>npm install --allow-scripts</code> doesn't seem to work, check two things: (1) You're running npm >= 11.11.0 — the <code>--allow-scripts</code> flag was added in that version and may behave differently in early releases. (2) In npm v12, <code>--allow-scripts</code> only enables the top-level install scripts, not transitive dependency scripts — you still need per-package approval for deep dependencies. Use <code>npm approve-scripts --allow-scripts-pending</code> to see the full list.</p>
+
+<h2>Why is npm-shrinkwrap.json ignored / not loaded in npm v12?</h2>
+<p><code>npm-shrinkwrap.json</code> is fully removed in v12 — the file is no longer read, loaded, or honored, even if it exists at the project root or inside published tarballs. Rename it to <code>package-lock.json</code>: <code>mv npm-shrinkwrap.json package-lock.json</code>. If you were shipping shrinkwrap inside a published package to lock dependency trees, switch to <code>bundleDependencies</code> in <code>package.json</code> instead.</p>
+
+<h2>Why do Git dependencies fail with "git+https://" not resolving in npm v12?</h2>
+<p>npm v12 blocks all Git-based dependencies (<code>git+https://</code>, <code>github:user/repo</code>) by default. You'll see errors like <code>npm ERR! Git dependency not allowed</code> or the install simply skips them. Fix: either add <code>--allow-git</code> to your <code>npm install</code> command, set <code>allow-git=true</code> in <code>.npmrc</code>, or (preferred) migrate Git dependencies to registry-published versions. Check your tree with <code>grep -r "git+" package.json package-lock.json</code>.</p>
+
+<h2>Why does npm view --json return an array instead of an object in v12?</h2>
+<p>npm v12 changed <code>npm view --json</code> output to always return an array, even for single-version queries. Scripts that parsed the old single-object format will break — e.g., <code>jq -r '.version'</code> needs to become <code>jq -r '.[0].version'</code>. Search your CI scripts and Makefiles for <code>npm view</code> combined with <code>--json</code> and update the JSON parsing accordingly.</p>
+
+<h2>npm ci exits with code 0 but native modules weren't built — why is my deploy broken?</h2>
+<p>This is the most dangerous scenario in npm v12. <code>npm ci</code> doesn't fail when scripts are blocked — it just skips them and exits cleanly. Your CI passes, but <code>node_modules</code> is missing compiled <code>.node</code> binaries (bcrypt, sharp, etc.). The app crashes at runtime with "cannot find module X.node", not at build time. Fix: Always run <code>npm approve-scripts --allow-scripts-pending</code> in CI first, approve the required packages, and commit the allowlist. Add a smoke test after <code>npm ci</code> that actually requires the native module — don't rely on exit codes alone.</p>
+
+<h2>I approved scripts in my monorepo root but workspace packages still can't run install scripts</h2>
+<p>npm v12's <code>allow-scripts</code> approval is per-package and stored in each package's <code>package.json</code>. The root <code>package.json</code> allowlist doesn't propagate to workspace packages — each workspace with native deps needs its own <code>npm approve-scripts</code> run from within that workspace directory. For monorepos, the safest approach: set <code>allow-scripts=all</code> in the root <code>.npmrc</code> temporarily while you audit, then run <code>npm approve-scripts --allow-scripts-pending</code> in each workspace directory before committing individual allowlists.</p>
+
+<h2>I set allow-scripts=true in .npmrc but scripts are still blocked — what's the real precedence?</h2>
+<p>There's a critical distinction: <code>allow-scripts=true</code> in <code>.npmrc</code> <em>enables</em> script execution globally, but each package still needs to be in the <em>allowlist</em> stored in <code>package.json</code>. Think of it as a two-gate system: gate 1 is the global on/off switch (<code>.npmrc</code> / <code>--allow-scripts</code> flag / env var), gate 2 is the per-package allowlist. Both must pass. If you want the old "everything runs" behavior, set <code>allow-scripts=all</code> (not <code>true</code>) in <code>.npmrc</code>. The precedence order for the global switch is: CLI flag > environment variable > .npmrc > default (off).</p>
+
+<h2>npm rebuild doesn't compile native modules in v12 — I thought rebuild bypassed the block?</h2>
+<p><code>npm rebuild</code> is also subject to script blocking in v12. If a package isn't in the allowlist, <code>npm rebuild &lt;package&gt;</code> will skip it silently. This breaks the classic troubleshooting workflow of "just run npm rebuild." Fix: approve the package first with <code>npm approve-scripts &lt;package&gt;</code>, then <code>npm rebuild &lt;package&gt;</code> will actually compile. Alternatively, <code>npm rebuild --allow-scripts</code> bypasses the block for the rebuild command only.</p>
+</section>
+
+</main>
+
+<section style="margin-top:3rem;text-align:center;">
+  <p style="color:var(--text-muted);">More from npm v12 Guide:</p>
+  <a href="/" class="back-link" style="margin:.3rem;">Breaking Changes &amp; Migration</a>
+  <a href="/ci-cd/" class="back-link" style="margin:.3rem;">CI/CD Pipeline Setup</a>
+  <a href="/native-modules/" class="back-link" style="margin:.3rem;">Native Module Fixes</a>
+  <a href="/monorepo/" class="back-link" style="margin:.3rem;">Monorepo Migration</a>
+  <a href="/rollback/" class="back-link" style="margin:.3rem;">Rollback Guide</a>
+  <a href="/vs-npm-11/" class="back-link" style="margin:.3rem;">npm 11 vs 12</a>
+</section>
+
+<footer class="footer">
+  <p>Built from 14 sources · 7 pain signals · 6 breaking changes mapped · npm v12 estimated July 2026</p>
+  <p style="margin-top:.5rem;">
+    <a href="/privacy/">Privacy</a> &middot;
+    <a href="/terms/">Terms</a> &middot;
+    <a href="https://installsafe.dev" style="color:var(--ok);">installsafe.dev</a>
+  </p>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "When exactly does npm v12 release, and when will it hit my Node.js?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 is estimated July 2026. No confirmed date for Node.js bundling. Current LTS lines (22, 24, 26) ship npm 11.x. Historically, new npm majors take 2–4 Node releases to land. But you should prepare now — v11.16.0 already shows warnings."}},
+        {"@type": "Question", "name": "Will --allow-scripts give me the old behavior back?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Adding allow-scripts=all to .npmrc restores the pre-v12 behavior. But the point is to move to an explicit allowlist approach. npm approve-scripts per package is the intended workflow — it's more secure and transparent."}},
+        {"@type": "Question", "name": "I have 200 dependencies. Do I need to manually approve every script?", "acceptedAnswer": {"@type": "Answer", "text": "No. Most packages don't have lifecycle scripts. Run npm approve-scripts --allow-scripts-pending to see the actual list — likely 3–8 packages. Approve the ones you trust (sharp, esbuild, node-gyp itself) and deny the rest."}},
+        {"@type": "Question", "name": "What about Yarn and pnpm? Do they have the same issues?", "acceptedAnswer": {"@type": "Answer", "text": "pnpm already supports per-package script allowlisting (via pnpm.onlyBuiltDependencies). Yarn 4+ has similar supply-chain protections. Both have had these controls for longer than npm."}},
+        {"@type": "Question", "name": "Is npm v12 backward compatible?", "acceptedAnswer": {"@type": "Answer", "text": "No. npm v12 is a major version with intentional breaking changes. Scripts disabled by default, Git deps blocked, remote URLs blocked, npm-shrinkwrap.json removed, and npm view --json returning arrays instead of objects. Projects that worked with npm 11 may fail under v12 without configuration changes."}},
+        {"@type": "Question", "name": "Can I keep using npm 11? How long is it supported?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, for now. npm install -g npm@11 keeps you on v11. But this is temporary — once Node.js LTS bundles npm v12, staying on v11 means manually pinning npm everywhere. Plan to migrate within 1-2 months of the Node.js bundle, not the npm v12 release date."}},
+        {"@type": "Question", "name": "What if my CI/CD pipeline breaks after upgrading to npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "Three most common failures: (1) Native modules won't compile — run npm approve-scripts and commit the allowlist. (2) Git dependencies won't resolve — add --allow-git or migrate. (3) npm ci exits cleanly but node_modules is missing compiled binaries — add a smoke test after install. Do not rely on exit codes alone."}},
+        {"@type": "Question", "name": "The allow-remote flag was blocking registry tarballs — is that fixed?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. GitHub Issue #9347 tracked a bug where allow-remote=none blocked even standard npm registry downloads. Fixed in npm 11.15.0+. The flag correctly only blocks non-registry URLs now."}},
+        {"@type": "Question", "name": "What if I still need npm-shrinkwrap.json for my published CLI tool?", "acceptedAnswer": {"@type": "Answer", "text": "Switch to bundleDependencies. Add \"bundleDependencies\": [\"dep-a\", \"dep-b\"] to package.json. When published, those deps are bundled in the tarball and installed from the local copy."}},
+        {"@type": "Question", "name": "How do I check if my project has hidden Git or remote deps from transitive dependencies?", "acceptedAnswer": {"@type": "Answer", "text": "Run npm ls --all | grep -E \"(git+|https://.*\\.tgz)\" while on npm 11.16.0+. Warnings will flag any transitive Git or remote deps. You can also audit your lockfile with grep -r \"git+\" package-lock.json to find them."}},
+        {"@type": "Question", "name": "Why does npm install fail with node-gyp rebuild failed after upgrading to npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 disables all lifecycle scripts by default — including the implicit node-gyp rebuild that compiles native addons. Fix: run npm approve-scripts --allow-scripts-pending to see which packages need native compilation, then npm approve-scripts <package-name> for each one you trust. Or add --allow-scripts as a quick workaround during migration."}},
+        {"@type": "Question", "name": "Why do I get cannot find module X.node after npm install in v12?", "acceptedAnswer": {"@type": "Answer", "text": "This means a native addon failed to compile because its install script was blocked. The .node binary is produced by node-gyp rebuild which no longer runs by default. Run npm approve-scripts --allow-scripts-pending to find the package that needs script approval, approve it, and re-run npm install."}},
+        {"@type": "Question", "name": "Why is my postinstall script blocked in npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 blocks all lifecycle scripts (preinstall, install, postinstall) by default. This is intended security behavior. Use npm approve-scripts <name> to approve specific packages. The approved list is stored in package.json — commit it so your team and CI share the same allowlist."}},
+        {"@type": "Question", "name": "Why is --allow-scripts not working in npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "Two things to check: (1) You need npm >= 11.11.0 for the --allow-scripts flag. (2) In v12, --allow-scripts only enables top-level scripts, not transitive dependency scripts — use npm approve-scripts --allow-scripts-pending to see the full list."}},
+        {"@type": "Question", "name": "Why is npm-shrinkwrap.json ignored / not loaded in npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm-shrinkwrap.json is fully removed in v12 — the file is no longer read, even if it exists. Rename it to package-lock.json. If you were shipping shrinkwrap inside a published package, switch to bundleDependencies in package.json instead."}},
+        {"@type": "Question", "name": "Why do Git dependencies fail with git+https:// not resolving in npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 blocks all Git-based dependencies by default. Fix: add --allow-git to npm install, set allow-git=true in .npmrc, or (preferred) migrate Git deps to registry-published versions. Check your tree with grep -r git+ package.json."}},
+        {"@type": "Question", "name": "Why does npm view --json return an array instead of an object in v12?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 changed npm view --json to always return an array, even for single-version queries. Scripts parsing the old single-object format will break — jq -r .version needs to become jq -r .[0].version. Search CI scripts for npm view combined with --json and update JSON parsing accordingly."}},
+        {"@type": "Question", "name": "npm ci exits with code 0 but native modules were not built — why is my deploy broken?", "acceptedAnswer": {"@type": "Answer", "text": "npm ci does not fail when scripts are blocked — it skips them and exits cleanly. Your CI passes but node_modules is missing compiled .node binaries. Always run npm approve-scripts in CI first and commit the allowlist. Add a smoke test after npm ci that requires the native module — do not rely on exit codes alone."}},
+        {"@type": "Question", "name": "I approved scripts in my monorepo root but workspace packages still cannot run install scripts", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 allow-scripts approval is per-package. The root allowlist does not propagate to workspaces — each workspace with native deps needs its own npm approve-scripts run from within that workspace directory. Run npm approve-scripts --allow-scripts-pending in each workspace before committing individual allowlists."}},
+        {"@type": "Question", "name": "I set allow-scripts=true in .npmrc but scripts are still blocked — what is the real precedence?", "acceptedAnswer": {"@type": "Answer", "text": "There is a two-gate system: gate 1 is the global on/off switch (.npmrc / --allow-scripts flag / env var), gate 2 is the per-package allowlist in package.json. Both must pass. For old behavior use allow-scripts=all. Precedence: CLI flag > env var > .npmrc > default (off)."}},
+        {"@type": "Question", "name": "npm rebuild does not compile native modules in v12 — I thought rebuild bypassed the block?", "acceptedAnswer": {"@type": "Answer", "text": "npm rebuild is also subject to script blocking in v12. If a package is not in the allowlist, npm rebuild will skip it silently. Approve the package first with npm approve-scripts, then npm rebuild will compile. Or use npm rebuild --allow-scripts to bypass the block."}}
+      ]
+    },
+    {
+      "@type": "Article",
+      "headline": "npm v12 FAQ — 21 Questions Answered: Scripts, Git Deps, CI/CD, Rollback",
+      "description": "Complete FAQ for npm v12 breaking changes. Covers release timeline, allowScripts, Git deps, remote URLs, shrinkwrap removal, CI/CD fixes, native modules, monorepo migration, and rollback to v11.",
+      "url": "https://installsafe.dev/faq/",
+      "datePublished": "2026-07-02",
+      "dateModified": "2026-07-02",
+      "author": {"@type": "Organization", "name": "npm v12 Guide", "url": "https://installsafe.dev"},
+      "isAccessibleForFree": true,
+      "isPartOf": {"@type": "WebSite", "url": "https://installsafe.dev/", "name": "npm v12 Guide"}
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://installsafe.dev/"},
+        {"@type": "ListItem", "position": 2, "name": "FAQ", "item": "https://installsafe.dev/faq/"}
+      ]
+    },
+    {
+      "@type": "Organization",
+      "name": "npm v12 Guide",
+      "url": "https://installsafe.dev/",
+      "description": "npm v12 breaking changes migration guide — dependency scripts, Git deps, shrinkwrap fixes"
+    },
+    {
+      "@type": "WebSite",
+      "name": "npm v12 Guide",
+      "url": "https://installsafe.dev",
+      "description": "npm v12 migration guide: breaking changes, migration checklist, vs npm 11 comparison",
+      "inLanguage": "en"
+    }
+  ]
+}
+</script>
+
+</body>
+</html>

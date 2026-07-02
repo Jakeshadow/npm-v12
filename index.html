@@ -12,8 +12,10 @@
 <meta property="og:site_name" content="npm v12 Guide">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="npm v12 Breaking Changes &amp; Release Date — July 2026 Migration Guide">
-<meta property="og:image" content="https://installsafe.dev/assets/og-image.svg">
-<meta name="twitter:image" content="https://installsafe.dev/assets/og-image.svg">
+<meta property="og:image" content="https://installsafe.dev/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:image" content="https://installsafe.dev/assets/og-image.png">
 <meta name="twitter:description" content="npm v12 pre-release is live (v12.0.0-pre.1). Final ships July 2026. 11.16.0 is the last 11.x stable.">
 <link rel="canonical" href="https://installsafe.dev/">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
@@ -35,6 +37,7 @@
     <a href="/vs-npm-11/">vs v11</a>
     <a href="/performance/">Performance</a>
     <a href="/errors/">Errors</a>
+    <a href="/faq/">FAQ</a>
   </div>
 </nav>
 
@@ -279,6 +282,21 @@ mv npm-shrinkwrap.json package-lock.json
 </details>
 
 <details>
+  <summary>Is npm v12 backward compatible?</summary>
+  <div class="faq-answer"><p>No. npm v12 is a major version with intentional breaking changes. Scripts disabled by default, Git deps blocked, remote URLs blocked, <code>npm-shrinkwrap.json</code> removed, and <code>npm view --json</code> returning arrays instead of objects. Projects that worked with npm 11 may fail to install, build, or deploy under v12 without configuration changes. The migration checklist above covers all known breaking changes.</p></div>
+</details>
+
+<details>
+  <summary>Can I keep using npm 11? How long is it supported?</summary>
+  <div class="faq-answer"><p>Yes, for now. <code>npm install -g npm@11</code> keeps you on v11. But this is temporary — once Node.js LTS (22, 24, 26) bundles npm v12, staying on v11 means manually pinning npm in every environment (CI, Docker, dev machines). npm 11 will receive security patches for a limited time after v12 ships, but npm doesn't publish an LTS calendar. <strong>Plan to migrate within 1-2 months of the Node.js bundle, not the npm v12 release date.</strong></p></div>
+</details>
+
+<details>
+  <summary>What if my CI/CD pipeline breaks after upgrading to npm v12?</summary>
+  <div class="faq-answer"><p>Three most common failures: (1) Native modules won't compile because scripts are blocked — run <code>npm approve-scripts</code> and commit the allowlist. (2) Git dependencies won't resolve — add <code>--allow-git</code> or migrate to registry versions. (3) <code>npm ci</code> exits cleanly but <code>node_modules</code> is missing compiled binaries — add a smoke test after install. <strong>Critical:</strong> don't rely on exit codes alone. npm v12's <code>npm ci</code> can pass while your app is broken. See the <a href="/ci-cd/">CI/CD guide</a> for full pipeline fixes.</p></div>
+</details>
+
+<details>
   <summary>The allow-remote flag was blocking registry tarballs — is that fixed?</summary>
   <div class="faq-answer"><p>Yes. GitHub Issue #9347 tracked a bug where <code>allow-remote=none</code> blocked even standard npm registry downloads. Fixed in npm 11.15.0+. The flag correctly only blocks non-registry URLs now.</p></div>
 </details>
@@ -421,12 +439,35 @@ mv npm-shrinkwrap.json package-lock.json
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Migrate to npm v12",
+  "description": "9-step checklist to prepare your project for npm v12 breaking changes before the final release.",
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "Upgrade to npm 11.16.0+ first", "text": "npm install -g npm@11 — npm 11.16.0+ already shows v12 deprecation warnings so you can preview what's coming before upgrading."},
+    {"@type": "HowToStep", "position": 2, "name": "Run an install and review warnings", "text": "npm install now previews v12 behavior. Warnings flag scripts, Git deps, and remote URLs that will be blocked."},
+    {"@type": "HowToStep", "position": 3, "name": "Audit dependency scripts", "text": "npm approve-scripts --allow-scripts-pending shows every package that runs lifecycle scripts. Most projects have only 3-8 such packages, not hundreds."},
+    {"@type": "HowToStep", "position": 4, "name": "Approve trusted packages", "text": "npm approve-scripts <package-name> for each trusted package (e.g., sharp, esbuild, node-gyp). Commit the updated package.json with the allowlist."},
+    {"@type": "HowToStep", "position": 5, "name": "Check for npm-shrinkwrap.json", "text": "ls npm-shrinkwrap.json — if found, rename to package-lock.json. npm-shrinkwrap.json is fully removed in v12."},
+    {"@type": "HowToStep", "position": 6, "name": "Find Git dependencies", "text": "grep -r git+ package.json — find any git+https:// or github:user/repo dependencies and decide to allow (--allow-git) or migrate to registry versions."},
+    {"@type": "HowToStep", "position": 7, "name": "Find remote URL deps", "text": "grep -r https://.*\\.tgz package.json — find remote tarball URLs and migrate or add --allow-remote."},
+    {"@type": "HowToStep", "position": 8, "name": "Fix npm view JSON parsing", "text": "grep your CI scripts for npm view combined with --json — npm v12 now returns arrays instead of objects. Update jq parsing from .version to .[0].version."},
+    {"@type": "HowToStep", "position": 9, "name": "Update .npmrc if needed", "text": "Add allow-git=true or allow-remote=true to .npmrc only if you actually need those features after auditing. Commit the changes."}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
     {"@type": "Question", "name": "When exactly does npm v12 release, and when will it hit my Node.js?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 is estimated July 2026. No confirmed date for Node.js bundling. Current LTS lines (22, 24, 26) ship npm 11.x. Historically, new npm majors take 2–4 Node releases to land. But you should prepare now — v11.16.0 already shows warnings."}},
     {"@type": "Question", "name": "Will --allow-scripts give me the old behavior back?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Adding allow-scripts=all to .npmrc restores the pre-v12 behavior. But the point is to move to an explicit allowlist approach. npm approve-scripts per package is the intended workflow — it's more secure and transparent."}},
     {"@type": "Question", "name": "I have 200 dependencies. Do I need to manually approve every script?", "acceptedAnswer": {"@type": "Answer", "text": "No. Most packages don't have lifecycle scripts. Run npm approve-scripts --allow-scripts-pending to see the actual list — likely 3–8 packages. Approve the ones you trust (sharp, esbuild, node-gyp itself) and deny the rest."}},
     {"@type": "Question", "name": "What about Yarn and pnpm? Do they have the same issues?", "acceptedAnswer": {"@type": "Answer", "text": "pnpm already supports per-package script allowlisting (via pnpm.onlyBuiltDependencies). Yarn 4+ has similar supply-chain protections. Both have had these controls for longer than npm."}},
+    {"@type": "Question", "name": "Is npm v12 backward compatible?", "acceptedAnswer": {"@type": "Answer", "text": "No. npm v12 is a major version with intentional breaking changes. Scripts disabled by default, Git deps blocked, remote URLs blocked, npm-shrinkwrap.json removed, and npm view --json returning arrays instead of objects. Projects that worked with npm 11 may fail under v12 without configuration changes."}},
+    {"@type": "Question", "name": "Can I keep using npm 11? How long is it supported?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, for now. npm install -g npm@11 keeps you on v11. But this is temporary — once Node.js LTS bundles npm v12, staying on v11 means manually pinning npm everywhere. Plan to migrate within 1-2 months of the Node.js bundle, not the npm v12 release date."}},
+    {"@type": "Question", "name": "What if my CI/CD pipeline breaks after upgrading to npm v12?", "acceptedAnswer": {"@type": "Answer", "text": "Three most common failures: (1) Native modules won't compile — run npm approve-scripts and commit the allowlist. (2) Git dependencies won't resolve — add --allow-git or migrate. (3) npm ci exits cleanly but node_modules is missing compiled binaries — add a smoke test after install. Do not rely on exit codes alone."}},
     {"@type": "Question", "name": "The allow-remote flag was blocking registry tarballs — is that fixed?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. GitHub Issue #9347 tracked a bug where allow-remote=none blocked even standard npm registry downloads. Fixed in npm 11.15.0+. The flag correctly only blocks non-registry URLs now."}},
     {"@type": "Question", "name": "What if I still need npm-shrinkwrap.json for my published CLI tool?", "acceptedAnswer": {"@type": "Answer", "text": "Switch to bundleDependencies. Add \"bundleDependencies\": [\"dep-a\", \"dep-b\"] to package.json. When published, those deps are bundled in the tarball and installed from the local copy."}},
     {"@type": "Question", "name": "How do I check if my project has hidden Git or remote deps from transitive dependencies?", "acceptedAnswer": {"@type": "Answer", "text": "Run npm ls --all | grep -E \"(git+|https://.*\\.tgz)\" while on npm 11.16.0+. Warnings will flag any transitive Git or remote deps. You can also audit your lockfile with grep -r \"git+\" package-lock.json to find them."}},
