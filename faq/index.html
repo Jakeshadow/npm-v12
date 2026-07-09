@@ -53,7 +53,7 @@
 
 <section>
 <h2>When exactly does npm v12 release, and when will it hit my Node.js?</h2>
-<p>npm v12 is estimated July 2026. No confirmed date for Node.js bundling. Current LTS lines (22, 24, 26) ship npm 11.x. Historically, new npm majors take 2–4 Node releases to land. But you should prepare now — v11.16.0 already shows warnings.</p>
+<p>npm v12 shipped July 8, 2026. No confirmed date for Node.js bundling. Current LTS lines (22, 24, 26) ship npm 11.x. Historically, new npm majors take 2–4 Node releases to land. v11.16.0 already shows warnings.</p>
 
 <h2>Will --allow-scripts give me the old behavior back?</h2>
 <p>Yes. Adding <code>allow-scripts=all</code> to <code>.npmrc</code> restores the pre-v12 behavior. But the point is to move to an explicit allowlist approach. <code>npm approve-scripts</code> per package is the intended workflow — it's more secure and transparent.</p>
@@ -129,7 +129,7 @@
 </section>
 
 <footer class="footer">
-  <p>Built from 14 sources · 7 pain signals · 6 breaking changes mapped · npm v12 estimated July 2026</p>
+  <p>Built from 14 sources · 7 pain signals · 6 breaking changes mapped · npm v12.0.0 shipped July 8, 2026</p>
       <p style="margin-top:.5rem;">By <strong>Luke Wang</strong> — npm ecosystem researcher. <a href="mailto:installsafe@proton.me">installsafe@proton.me</a></p>
   <p style="margin-top:.5rem;">
     <a href="/privacy/">Privacy</a> &middot;
@@ -145,7 +145,7 @@
     {
       "@type": "FAQPage",
       "mainEntity": [
-        {"@type": "Question", "name": "When exactly does npm v12 release, and when will it hit my Node.js?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 is estimated July 2026. No confirmed date for Node.js bundling. Current LTS lines (22, 24, 26) ship npm 11.x. Historically, new npm majors take 2–4 Node releases to land. But you should prepare now — v11.16.0 already shows warnings."}},
+        {"@type": "Question", "name": "When exactly does npm v12 release, and when will it hit my Node.js?", "acceptedAnswer": {"@type": "Answer", "text": "npm v12 shipped July 8, 2026. No confirmed date for Node.js bundling. Current LTS lines (22, 24, 26) ship npm 11.x. Historically, new npm majors take 2–4 Node releases to land. v11.16.0 already shows warnings."}},
         {"@type": "Question", "name": "Will --allow-scripts give me the old behavior back?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Adding allow-scripts=all to .npmrc restores the pre-v12 behavior. But the point is to move to an explicit allowlist approach. npm approve-scripts per package is the intended workflow — it's more secure and transparent."}},
         {"@type": "Question", "name": "I have 200 dependencies. Do I need to manually approve every script?", "acceptedAnswer": {"@type": "Answer", "text": "No. Most packages don't have lifecycle scripts. Run npm approve-scripts --allow-scripts-pending to see the actual list — likely 3–8 packages. Approve the ones you trust (sharp, esbuild, node-gyp itself) and deny the rest."}},
         {"@type": "Question", "name": "What about Yarn and pnpm? Do they have the same issues?", "acceptedAnswer": {"@type": "Answer", "text": "pnpm already supports per-package script allowlisting (via pnpm.onlyBuiltDependencies). Yarn 4+ has similar supply-chain protections. Both have had these controls for longer than npm."}},

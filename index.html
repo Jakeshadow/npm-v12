@@ -38,13 +38,14 @@
     <a href="/performance/">Performance</a>
     <a href="/errors/">Errors</a>
     <a href="/faq/">FAQ</a>
+    <a href="/production-guide/" style="background:var(--accent);color:#fff;border-radius:20px;padding:6px 16px;">Production Guide — $12</a>
   </div>
 </nav>
 
 <main>
 
 <section class="hero">
-  <div style="margin-bottom:16px;"><span class="priority-tag tag-p0" style="background:#1a3a1a;color:#4ade80;font-size:.9rem;padding:.3rem .7rem;">RELEASED</span> <span style="color:var(--text-muted);font-size:.85rem;">v12.0.0 — shipped <span class="eta">July 8, 2026</span></span></div>
+  <div style="margin-bottom:16px;"><span class="priority-tag tag-p0" style="background:#1a3a1a;color:#4ade80;font-size:.9rem;padding:.3rem .7rem;">RELEASED</span> <span style="color:var(--text-muted);font-size:.85rem;">v12.0.0 — shipped July 8, 2026</span></div>
   <h1>npm v12 Is Here — Breaking Changes Migration Guide</h1>
   <p style="font-size:1.1rem;color:var(--text-muted);max-width:640px;">
     <strong>For 12 years</strong>, npm let any package run arbitrary code during <code>npm install</code>.
@@ -71,7 +72,7 @@
 </p>
 <p>
   npm v12.0.0 shipped <strong>July 8, 2026</strong>.
-  You can prepare today using npm 11.16.0+, which already shows warnings for the upcoming v12 behavior.
+  You can prepare today using npm 11.16.0+, which already shows warnings for the new v12 defaults.
 </p>
 
 <h3>Release Timeline</h3>
@@ -83,8 +84,8 @@
         <td style="padding:.6rem 0;">v12.0.0-pre.0.0 on npm registry — available for testing</td>
       </tr>
       <tr style="border-bottom:1px solid var(--gray-200);">
-        <td style="padding:.6rem .8rem .6rem 0;font-weight:600;white-space:nowrap;"><span class="eta">Soon</span></td>
-        <td style="padding:.6rem 0;">Final v12.0.0 — <strong style="color:#4ade80;">shipped July 8, 2026</strong></td>
+        <td style="padding:.6rem .8rem .6rem 0;font-weight:600;white-space:nowrap;"><span class="priority-tag tag-skip" style="margin-right:.4rem;background:#1a3a1a;color:#4ade80;">&#10003;</span> Final</td>
+        <td style="padding:.6rem 0;">v12.0.0 — <strong style="color:#4ade80;">shipped July 8, 2026</strong></td>
       </tr>
       <tr>
         <td style="padding:.6rem .8rem .6rem 0;font-weight:600;white-space:nowrap;"><span style="color:var(--text-muted);">Upcoming</span></td>
@@ -365,9 +366,15 @@ mv npm-shrinkwrap.json package-lock.json
   <summary>npm rebuild doesn't compile native modules in v12 — I thought rebuild bypassed the block?</summary>
   <div class="faq-answer"><p><code>npm rebuild</code> is also subject to script blocking in v12. If a package isn't in the allowlist, <code>npm rebuild &lt;package&gt;</code> will skip it silently. This breaks the classic troubleshooting workflow of "just run npm rebuild." Fix: approve the package first with <code>npm approve-scripts &lt;package&gt;</code>, then <code>npm rebuild &lt;package&gt;</code> will actually compile. Alternatively, <code>npm rebuild --allow-scripts</code> bypasses the block for the rebuild command only.</p></div>
 </details>
+
+<div class="cta-card" style="margin-top:1.5rem;background:var(--bg-alt);border:2px solid var(--accent);border-radius:var(--radius);padding:1.5rem;text-align:center;">
+  <h3 style="margin-top:0;">Want the complete handbook?</h3>
+  <p style="color:var(--text-muted);margin-bottom:1rem;">CI/CD templates, native module matrix, monorepo playbook, 40+ error fixes — everything that isn't on this page.</p>
+  <a href="/production-guide/" class="btn btn-primary" style="font-size:15px;padding:10px 28px;">npm v12 Production Guide — $12</a>
+</div>
 </section>
 
-<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;">Last updated: July 3, 2026</p>
+<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;">Last updated: July 9, 2026</p>
 </main>
 
 <section style="margin-top:3rem;text-align:center;">
