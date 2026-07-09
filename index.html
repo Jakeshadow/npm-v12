@@ -38,7 +38,6 @@
     <a href="/performance/">Performance</a>
     <a href="/errors/">Errors</a>
     <a href="/faq/">FAQ</a>
-    <a href="/production-guide/" style="background:var(--accent);color:#fff;border-radius:20px;padding:6px 16px;">Production Guide — $12</a>
   </div>
 </nav>
 
@@ -366,12 +365,6 @@ mv npm-shrinkwrap.json package-lock.json
   <summary>npm rebuild doesn't compile native modules in v12 — I thought rebuild bypassed the block?</summary>
   <div class="faq-answer"><p><code>npm rebuild</code> is also subject to script blocking in v12. If a package isn't in the allowlist, <code>npm rebuild &lt;package&gt;</code> will skip it silently. This breaks the classic troubleshooting workflow of "just run npm rebuild." Fix: approve the package first with <code>npm approve-scripts &lt;package&gt;</code>, then <code>npm rebuild &lt;package&gt;</code> will actually compile. Alternatively, <code>npm rebuild --allow-scripts</code> bypasses the block for the rebuild command only.</p></div>
 </details>
-
-<div class="cta-card" style="margin-top:1.5rem;background:var(--bg-alt);border:2px solid var(--accent);border-radius:var(--radius);padding:1.5rem;text-align:center;">
-  <h3 style="margin-top:0;">Want the complete handbook?</h3>
-  <p style="color:var(--text-muted);margin-bottom:1rem;">CI/CD templates, native module matrix, monorepo playbook, 40+ error fixes — everything that isn't on this page.</p>
-  <a href="/production-guide/" class="btn btn-primary" style="font-size:15px;padding:10px 28px;">npm v12 Production Guide — $12</a>
-</div>
 </section>
 
 <p style="color:var(--text-muted);font-size:0.85rem;text-align:center;">Last updated: July 9, 2026</p>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>npm v12 Production Migration Guide — $12</title>
+<meta name="description" content="Complete npm v12 production handbook: CI/CD templates, native module matrix, monorepo playbook, 40+ error fixes. Copy-paste configs for teams migrating to npm 12.">
+<meta property="og:title" content="npm v12 Production Migration Guide — $12">
+<meta property="og:description" content="Complete npm v12 production handbook: CI/CD templates, native module matrix, monorepo playbook, 40+ error fixes. Copy-paste configs for teams migrating to npm 12.">
+<meta property="og:type" content="product">
+<meta property="og:url" content="https://installsafe.dev/production-guide/">
+<meta property="og:site_name" content="npm v12 Guide">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="npm v12 Production Migration Guide — $12">
+<meta name="twitter:description" content="Complete npm v12 production handbook: CI/CD templates, native module matrix, monorepo playbook, 40+ error fixes.">
+<meta property="og:image" content="https://installsafe.dev/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:image" content="https://installsafe.dev/assets/og-image.png">
+<link rel="canonical" href="https://installsafe.dev/production-guide/">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">npm<span style="color:var(--accent);">v12</span>guide</a>
+  <div class="nav-links">
+    <a href="/">Changes</a>
+    <a href="/vs-npm-11/">vs v11</a>
+    <a href="/performance/">Performance</a>
+    <a href="/errors/">Errors</a>
+    <a href="/faq/">FAQ</a>
+    <a href="/production-guide/" class="current" style="background:var(--accent);color:#fff;border-radius:20px;padding:6px 16px;">Production Guide — $12</a>
+  </div>
+</nav>
+
+<main>
+
+<section class="hero">
+  <div style="margin-bottom:16px;"><span class="priority-tag tag-p0" style="background:#1a3a1a;color:#4ade80;font-size:.9rem;padding:.3rem .7rem;">AVAILABLE NOW</span> <span style="color:var(--text-muted);font-size:.85rem;">Updated for npm v12.0.0</span></div>
+  <h1>npm v12 Production Migration Guide</h1>
+  <p style="font-size:1.1rem;color:var(--text-muted);max-width:640px;">
+    The free guide covers the breaking changes. This is the <strong>complete handbook</strong> — copy-paste configs for CI/CD, native modules, monorepos, rollback strategy, and every edge case that breaks at scale.
+  </p>
+  <p style="margin-top:1rem;">
+    <a href="#pricing" class="btn btn-primary" style="font-size:16px;padding:12px 32px;">Buy Now — $12</a>
+    <a href="#inside" style="margin-left:12px;color:var(--text-muted);font-size:.9rem;">See What's Inside ↓</a>
+  </p>
+</section>
+
+<section id="inside">
+<h2>What the Free Guide Doesn't Cover</h2>
+<p>The homepage covers the <strong>what</strong> — 6 breaking changes and a migration checklist. This handbook covers the <strong>how</strong> — the production edge cases that break under real load.</p>
+
+<div class="breaking-change" style="border-left:4px solid var(--ok);">
+  <h3 style="color:var(--ok);">&#10003; Free — Breaking changes explained</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">allowScripts, allowGit, allowRemote, shrinkwrap removal, npm view JSON change, npm pkg output change — all 6 are on the homepage.</p>
+</div>
+
+<div class="breaking-change" style="border-left:4px solid var(--accent);">
+  <h3>&#128274; CI/CD pipeline templates</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">Copy-paste GitHub Actions, GitLab CI, and CircleCI configs that handle v12's two-gate script system. Includes the smoke test pattern that catches <code>npm ci</code> passing with missing <code>.node</code> binaries — the most dangerous v12 failure mode.</p>
+</div>
+
+<div class="breaking-change" style="border-left:4px solid var(--accent);">
+  <h3>&#128274; Native module migration matrix</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">30+ popular native packages tested against v12.0.0: which need allow-scripts, which break silently, which need node-gyp version pins. Including bcrypt, sharp, esbuild, Puppeteer, node-sass, canvas, sqlite3, and the ones that surprise you.</p>
+</div>
+
+<div class="breaking-change" style="border-left:4px solid var(--accent);">
+  <h3>&#128274; Monorepo &amp; workspace strategy</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">Per-workspace allow-scripts patterns, root config vs workspace config precedence, and the <code>npm approve-scripts</code> workflow for 20+ package trees. Includes the trap where root allowlist doesn't propagate.</p>
+</div>
+
+<div class="breaking-change" style="border-left:4px solid var(--accent);">
+  <h3>&#128274; Rollback &amp; dual-version strategy</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">How to run npm 11 and 12 side-by-side during migration. Keeping CI on v11 while devs test v12. The full Docker/Node version matrix showing exactly when v12 lands in each LTS line.</p>
+</div>
+
+<div class="breaking-change" style="border-left:4px solid var(--accent);">
+  <h3>&#128274; npm-shrinkwrap.json deep dive</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">Migration path for published CLI tools and daemons that ship shrinkwrap. bundleDependencies vs shrinkwrap semantics, gotchas when switching, and the 3 project types that can't use bundleDependencies and need the workaround.</p>
+</div>
+
+<div class="breaking-change" style="border-left:4px solid var(--accent);">
+  <h3>&#128274; Error message decoder</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">40+ v12 error messages with verified fixes. Every error you'll hit from EALLOWSCRIPTS to EGITBLOCKED to the node-gyp compilation failures — each with the exact command to fix it.</p>
+</div>
+</section>
+
+<section id="toc">
+<h2>Table of Contents</h2>
+<table>
+  <thead>
+    <tr><th>Ch</th><th>What You'll Learn</th></tr>
+  </thead>
+  <tbody>
+    <tr><td style="font-weight:600;">1.</td><td><strong>npm v12 Deep Dive</strong> — Why the defaults changed. The Shai Halud supply-chain attack context. Two-gate script system explained (global switch + per-package allowlist). What the docs don't tell you about precedence.</td></tr>
+    <tr><td style="font-weight:600;">2.</td><td><strong>allowScripts in Production</strong> — Per-package approval workflow for teams of 3–50+. Allowlist management with git. The allow-scripts=all escape hatch and when to use it. Approving transitive scripts.</td></tr>
+    <tr><td style="font-weight:600;">3.</td><td><strong>CI/CD Pipeline Templates</strong> — GitHub Actions (3 variants), GitLab CI, CircleCI. Each template includes the npm ci → smoke test → deploy flow. The missing-native-module detection pattern.</td></tr>
+    <tr><td style="font-weight:600;">4.</td><td><strong>Native Module Matrix</strong> — 30+ packages tested. Version pinning. node-gyp + Python requirements. prebuild-install vs node-gyp rebuild. What breaks silently, what fails loudly.</td></tr>
+    <tr><td style="font-weight:600;">5.</td><td><strong>Monorepo Migration Playbook</strong> — npm workspaces, Turborepo, Nx. Per-workspace allow-scripts. Root config propagation rules. The audit loop that finds hidden Git deps across the tree.</td></tr>
+    <tr><td style="font-weight:600;">6.</td><td><strong>Git &amp; Remote Dependencies</strong> — allowGit and allowRemote deep dive. Transitive Git dep detection. Private registry alternatives. The GitHub #9347 bug: what it was, how it was fixed, and when it matters.</td></tr>
+    <tr><td style="font-weight:600;">7.</td><td><strong>npm-shrinkwrap.json Endgame</strong> — Migration paths for 3 scenarios: project root replacement, published CLI tools, bundled daemons. bundleDependencies gotchas. The hidden shrinkwrap in tarballs problem.</td></tr>
+    <tr><td style="font-weight:600;">8.</td><td><strong>Dual-Version Rollout Strategy</strong> — Running npm 11 and 12 side-by-side. CI pinning. Docker images. Node.js LTS timeline. How to migrate team-by-team without breaking production.</td></tr>
+    <tr><td style="font-weight:600;">9.</td><td><strong>Error Message Decoder</strong> — 40+ error messages. Exact cause, exact fix. Copy-paste commands for every failure mode.</td></tr>
+    <tr><td style="font-weight:600;">A.</td><td><strong>Appendix: npm 11 → 12 Diff Reference</strong> — Every config change, every removed command, every API change. Quick lookup when something breaks.</td></tr>
+  </tbody>
+</table>
+
+<h3>Also Included</h3>
+
+<div class="breaking-change">
+  <h3>CI/CD Config Pack</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">Ready-to-use YAML files for GitHub Actions, GitLab CI, and CircleCI. Drop in, adjust 2 variables, deploy.</p>
+</div>
+<div class="breaking-change">
+  <h3>Smoke Test Scripts</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">Shell scripts that detect missing <code>.node</code> binaries after <code>npm ci</code>. Catches the v12 silent-failure mode.</p>
+</div>
+<div class="breaking-change">
+  <h3>Native Module Checklist</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">One-page reference: 30 packages, their v12 status, required approval, node-gyp version pins.</p>
+</div>
+<div class="breaking-change">
+  <h3>Error Quick-Reference Card</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">Every v12 error code → one-line fix. Print it, tape it to your monitor.</p>
+</div>
+</section>
+
+<section id="pricing">
+<h2>The Complete Handbook</h2>
+<p>9 chapters + appendix. Copy-paste configs. CI/CD templates. One-time payment. Free updates through npm v12.x.</p>
+
+<div class="cta-card" style="background:var(--bg-alt);border:2px solid var(--accent);border-radius:var(--radius);padding:2rem;text-align:center;margin:1.5rem 0;">
+  <p style="font-family:'Google Sans',sans-serif;font-size:1.4rem;font-weight:700;color:var(--accent);margin-bottom:0;">$12</p>
+  <p style="color:var(--text-muted);margin-bottom:1.5rem;">One-time · Lifetime updates · DRM-free PDF</p>
+  <a href="#" class="btn btn-primary" style="font-size:16px;padding:12px 40px;" id="buy-button">Buy Now — $12</a>
+  <p style="color:var(--text-muted);font-size:.85rem;margin-top:1rem;">&#128274; 30-day money-back guarantee — full refund if it doesn't save you time.</p>
+  <p style="color:var(--text-muted);font-size:.8rem;margin-top:.5rem;">Paddle checkout incoming. Purchase button activates when Paddle price ID is configured.</p>
+</div>
+</section>
+
+<section id="who-for">
+<h2>Who This Is For</h2>
+
+<div class="use-case">
+  <h3>&#10003; CI/CD pipeline maintainers</h3>
+  <p style="margin-bottom:0;">Your pipelines break silently under v12. This handbook gives you the exact YAML configs + smoke test patterns to catch the failures before they hit production.</p>
+</div>
+<div class="use-case">
+  <h3>&#10003; Engineering leads planning the migration</h3>
+  <p style="margin-bottom:0;">You need a rollout strategy for 5–50+ developers. Dual-version approach, CI pinning, team-by-team migration — all documented with timelines.</p>
+</div>
+<div class="use-case">
+  <h3>&#10003; npm package authors</h3>
+  <p style="margin-bottom:0;">Your published packages break under v12 because of native deps, Git references, or shrinkwrap. Fix them before your users complain.</p>
+</div>
+<div class="use-case">
+  <h3>&#10003; Developers who just want it to work</h3>
+  <p style="margin-bottom:0;">You upgraded, <code>npm install</code> broke, and you don't want to read 14 GitHub issues. The error decoder appendix tells you exactly what to run.</p>
+</div>
+</section>
+
+<section id="what-not">
+<h2>What This Is Not</h2>
+
+<div class="verdict">
+  <h3>Not a repeat of the free guide</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">The homepage covers the 6 breaking changes. This handbook covers the <strong>deployment-level strategy</strong> — CI/CD templates, monorepo workflows, rollback plans, and the edge cases that only surface at scale.</p>
+</div>
+<div class="verdict">
+  <h3>Not speculation</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">Every config, error, and workaround is tested against npm v12.0.0. No guesses, no "should work" — only verified behavior.</p>
+</div>
+<div class="verdict">
+  <h3>Not a pnpm/Yarn pitch</h3>
+  <p style="color:var(--text-muted);margin-bottom:0;">If you want to switch package managers, great. This is for teams staying on npm who need to handle v12 without a week of downtime.</p>
+</div>
+</section>
+
+<section id="free-links" style="margin-top:2rem;">
+<h2>Free Content on This Site</h2>
+<p>The breaking changes, migration checklist, and FAQ are 100% free. Browse before you buy.</p>
+<div style="margin-top:1rem;">
+  <a href="/" class="back-link" style="margin:.3rem;">Breaking Changes</a>
+  <a href="/vs-npm-11/" class="back-link" style="margin:.3rem;">npm 11 vs 12</a>
+  <a href="/ci-cd/" class="back-link" style="margin:.3rem;">CI/CD Guide</a>
+  <a href="/native-modules/" class="back-link" style="margin:.3rem;">Native Modules</a>
+  <a href="/monorepo/" class="back-link" style="margin:.3rem;">Monorepo</a>
+  <a href="/faq/" class="back-link" style="margin:.3rem;">FAQ</a>
+</div>
+</section>
+
+<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;margin-top:2rem;">Last updated: July 9, 2026</p>
+</main>
+
+<footer class="footer">
+  <p>Built from 14+ sources · Tested against npm v12.0.0 · Unofficial community guide</p>
+      <p style="margin-top:.5rem;">By <strong>Luke Wang</strong> — npm ecosystem researcher. <a href="mailto:installsafe@proton.me">installsafe@proton.me</a></p>
+  <p style="margin-top:.5rem;">
+    <a href="/privacy/">Privacy</a> &middot;
+    <a href="/terms/">Terms</a> &middot;
+    <a href="https://installsafe.dev" style="color:var(--ok);">installsafe.dev</a>
+  </p>
+</footer>
+
+</body>
+</html>
