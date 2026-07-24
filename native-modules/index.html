@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>npm v12 Native Module Compilation: node-gyp Fixes for bcrypt, sharp</title>
-<meta name="description" content="npm v12 disables implicit node-gyp rebuild. bcrypt, sharp, esbuild native binaries break. C++17 required. Fix with approve-scripts + platform-specific solutions.">
-<meta property="og:title" content="npm v12 Native Module Compilation: node-gyp Fixes for bcrypt, sharp">
-<meta property="og:description" content="npm v12 disables implicit node-gyp rebuild. C++17 required. Platform-specific fixes for Windows, Linux, macOS.">
+<title>node-gyp Build Failing? Native Module Fixes for bcrypt, sharp, esbuild</title>
+<meta name="description" content="node-gyp rebuild failed? Native modules not compiling? Fixes for bcrypt, sharp, esbuild, puppeteer, node-sass. Platform-specific guides for Windows, Linux, macOS. npm v12 script blocking fix included.">
+<meta property="og:title" content="node-gyp Build Failing? Native Module Fixes for bcrypt, sharp, esbuild">
+<meta property="og:description" content="node-gyp rebuild failed? Native modules not compiling? Fixes for bcrypt, sharp, esbuild, puppeteer, node-sass. Platform-specific guides for Windows, Linux, macOS.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://installsafe.dev/native-modules/">
 <meta property="og:site_name" content="npm v12 Guide">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="npm v12 Native Module Compilation Guide">
+<meta name="twitter:title" content="node-gyp Build Failing? Native Module Fixes (Windows, Linux, macOS)">
 <meta property="og:image" content="https://installsafe.dev/assets/og-image.svg">
 <meta name="twitter:image" content="https://installsafe.dev/assets/og-image.svg">
-<meta name="twitter:description" content="npm v12 disables implicit node-gyp rebuild. C++17 required. Fixes for bcrypt, sharp, esbuild.">
+<meta name="twitter:description" content="node-gyp rebuild failed? Native module fixes for bcrypt, sharp, esbuild, puppeteer. Platform-specific guides. npm v12 script blocking fix included.">
 <link rel="canonical" href="https://installsafe.dev/native-modules/">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
@@ -34,26 +34,24 @@
     <a href="/">Home</a>
     <a href="/ci-cd/">CI/CD</a>
     <a href="/native-modules/">Native Modules</a>
-    <a href="/monorepo/">Monorepo</a>
-    <a href="/rollback/">Rollback</a>
     <a href="/vs-npm-11/">npm 11 vs 12</a>
-    <a href="/faq/">FAQ</a>
+    <a href="/#faq">FAQ</a>
   </div>
 </nav>
 
 <main>
 
 <section class="hero">
-  <h1>npm v12 Native Module Compilation: node-gyp Fixes for bcrypt, sharp</h1>
+  <h1>node-gyp Build Failing? Native Module Fixes for bcrypt, sharp, esbuild</h1>
   <p style="font-size:1.1rem;color:var(--text-muted);max-width:640px;">
-    <strong>npm v12 disables the implicit node-gyp rebuild. Your bcrypt, sharp, and esbuild native binaries won't compile unless you explicitly allow them.</strong>
-    Plus: C++17 is now required. If your compiler is pre-2017, native addon builds fail at the source level.
+    <strong>node-gyp rebuild failed, <code>.node</code> binary missing, native module won't compile — whatever the cause, here's the fix.</strong>
+    Covers native modules that install scripts (bcrypt, sharp, esbuild, puppeteer, node-sass), C++17 toolchain requirements per platform, and the <code>npm approve-scripts</code> workflow introduced in npm v12.
   </p>
 </section>
 
 <section>
-<h2>Why Native Modules Break in npm v12</h2>
-<p>For 12 years, npm has automatically detected <code>binding.gyp</code> files and run <code>node-gyp rebuild</code> post-install. This worked — but it meant any package with a <code>binding.gyp</code> could execute arbitrary code during install. npm v12 closes this: <strong>zero postinstall scripts execute unless explicitly approved, per package</strong>.</p>
+<h2>Why Native Modules Break</h2>
+<p>For 12 years, npm has automatically detected <code>binding.gyp</code> files and run <code>node-gyp rebuild</code> post-install. This worked — but it meant any package with a <code>binding.gyp</code> could execute arbitrary code during install. <strong>npm v12 closes this: zero postinstall scripts execute unless explicitly approved, per package.</strong> But even on older npm versions, native compilation can fail due to missing build tools, wrong Python version, or outdated compilers. This guide covers all causes.</p>
 
 <div class="breaking-change">
   <h3>The Chain That Breaks</h3>
@@ -70,8 +68,8 @@
 </section>
 
 <section>
-<h2>node-gyp v12 Compatibility: C++17 Required</h2>
-<p>npm v12 bundles node-gyp 12.x, which requires a C++17 compiler. This is a <strong>hard requirement</strong> — native addons with C++11 or C++14 code paths will fail to compile.</p>
+<h2>node-gyp &amp; C++17: Toolchain Requirements</h2>
+<p>node-gyp 12.x (bundled with npm v12) requires a C++17 compiler. This is a <strong>hard requirement</strong> — native addons with C++11 or C++14 code paths will fail to compile. Even on older npm/node-gyp versions, an outdated compiler is the #1 cause of native build failures.</p>
 
 <h3>Platform Toolchain Requirements</h3>
 
@@ -249,8 +247,6 @@ function findNative(deps){
 <section style="margin-top:3rem;text-align:center;">
   <p style="color:var(--text-muted);">Related Guides:</p>
   <a href="/ci-cd/" class="back-link" style="margin:.3rem;">CI/CD Pipeline</a>
-  <a href="/monorepo/" class="back-link" style="margin:.3rem;">Monorepo Guide</a>
-  <a href="/rollback/" class="back-link" style="margin:.3rem;">Rollback Strategies</a>
   <a href="/" class="back-link" style="margin:.3rem;">← Migration Guide</a>
 </section>
 
@@ -269,8 +265,8 @@ function findNative(deps){
 {
   "@context": "https://schema.org",
   "@type": "Article",
-  "headline": "npm v12 Native Module Compilation: node-gyp Fixes for bcrypt, sharp",
-  "description": "npm v12 disables implicit node-gyp rebuild. bcrypt, sharp, esbuild native binaries break. C++17 required. Fix with approve-scripts.",
+  "headline": "node-gyp Build Failing? Native Module Fixes for bcrypt, sharp, esbuild",
+  "description": "node-gyp rebuild failed? Fixes for bcrypt, sharp, esbuild, puppeteer, node-sass. Platform-specific guides for Windows, Linux, macOS. C++17 toolchain requirements and npm approve-scripts workflow.",
   "datePublished": "2026-06-13",
   "dateModified": "2026-06-13",
   "author": {"@type": "Organization", "name": "npmv12guide"},

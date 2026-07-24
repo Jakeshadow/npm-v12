@@ -37,7 +37,7 @@
     <a href="/vs-npm-11/">vs v11</a>
     <a href="/performance/">Performance</a>
     <a href="/errors/">Errors</a>
-    <a href="/faq/">FAQ</a>
+    <a href="/#faq">FAQ</a>
   </div>
 </nav>
 
@@ -231,11 +231,36 @@ mv npm-shrinkwrap.json package-lock.json
   <li><strong>Update .npmrc if needed</strong> — add <code>allow-git=true</code> or <code>allow-remote=true</code> only if you actually need them</li>
 </ol>
 
-<div class="rollback">
-  <strong>Quick rollback:</strong>
-  <pre style="margin:.5rem 0 0;background:transparent;border-color:#fecaca;">npm install -g npm@11    # stays on v11 behavior</pre>
-  <p style="margin:.5rem 0 0;font-size:.9rem;color:var(--text-muted);">This is temporary — once Node.js bundles v12, rollback gets harder. <strong>Prepare now.</strong></p>
-</div>
+<section id="rollback" style="margin-top:3rem;">
+<h2>Staying on npm 11? Pin, Override, and Rollback</h2>
+
+<p>Not ready for v12? Here's how to pin npm 11 across your team, override the Node.js-bundled version, and roll back cleanly if you already upgraded.</p>
+
+<h3>Pin npm 11 Globally</h3>
+<pre>npm install -g npm@11
+npm config set save-exact true</pre>
+<p>Add to <code>package.json</code> to enforce at the project level:</p>
+<pre>{
+  "engines": { "npm": "&lt;12" }
+}</pre>
+<p>Then in <code>.npmrc</code>: <code>engine-strict=true</code> — npm 12 will refuse to install on this project.</p>
+
+<h3>Docker Override</h3>
+<pre>FROM node:22
+RUN npm install -g npm@11 &amp;&amp; \
+    npm --version  # verify: 11.x.x</pre>
+
+<h3>Emergency Rollback: Already Upgraded?</h3>
+<pre>npm install -g npm@11
+npm --version            # verify: 11.x.x</pre>
+<p>If npm 12 corrupted your <code>node_modules</code>:</p>
+<pre>rm -rf node_modules package-lock.json
+npm install</pre>
+<p>If npm 12 approved scripts that shouldn't be approved, check <code>package.json</code>'s <code>"scriptsApproved"</code> field — remove entries if needed, then re-audit on npm 11: <code>npm install --ignore-scripts</code>.</p>
+
+<h3>How Long Can You Stay?</h3>
+<p>npm 11 will receive security patches until ~2027 (approximately 2 years after npm 12 GA). You have time — but don't ignore it indefinitely. When npm 11 reaches EOL, your npm client itself becomes a supply-chain attack vector.</p>
+</section>
 </section>
 
 <section id="use-cases">
@@ -248,7 +273,13 @@ mv npm-shrinkwrap.json package-lock.json
 
 <div class="use-case">
   <h3>Monorepo Maintainer</h3>
-  <p>Workspaces, cross-references, and Git dependencies for pre-release packages are common in monorepos. <code>--allow-git</code> will be needed across the entire tree if any package has a Git dep. Check your root and all sub-package <code>package.json</code> files.</p>
+  <p>Monorepos hit unique pain in v12. Three pitfalls to watch:</p>
+  <ol>
+    <li><strong>Workspace allowlists don't cascade.</strong> Approving <code>bcrypt</code> at the root does <em>nothing</em> for <code>packages/api</code>. Each workspace with native deps must run <code>npm approve-scripts</code> from within that workspace directory.</li>
+    <li><strong>Root <code>.npmrc</code> doesn't cascade.</strong> Setting <code>allow-git=true</code> in root <code>.npmrc</code> only affects root-level operations. Workspaces resolve config independently — set per-workspace <code>.npmrc</code> files or pass flags at install time.</li>
+    <li><strong>Git deps are common.</strong> Monorepos frequently use <code>git+https://</code> for cross-package references. Migrate to <code>workspace:*</code> protocol within the monorepo, or use <code>file:</code> dependencies as an interim fix.</li>
+  </ol>
+  <p>Audit all workspaces: <code>grep -r 'git+https://' packages/*/package.json packages/*/package-lock.json</code></p>
 </div>
 
 <div class="use-case">
@@ -378,8 +409,7 @@ mv npm-shrinkwrap.json package-lock.json
   <p style="color:var(--text-muted);">More from npm v12 Guide:</p>
   <a href="/ci-cd/" class="back-link" style="margin:.3rem;">CI/CD Pipeline Setup</a>
   <a href="/native-modules/" class="back-link" style="margin:.3rem;">Native Module Fixes</a>
-  <a href="/monorepo/" class="back-link" style="margin:.3rem;">Monorepo Migration</a>
-  <a href="/rollback/" class="back-link" style="margin:.3rem;">Rollback Guide</a>
+  <a href="/errors/" class="back-link" style="margin:.3rem;">Error Troubleshooting</a>
   <a href="/vs-npm-11/" class="back-link" style="margin:.3rem;">npm 11 vs 12</a>
 </section>
 
